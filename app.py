@@ -4,7 +4,7 @@ from flask import Flask, render_template, request, redirect, url_for, session, f
 app = Flask(__name__)
 app.secret_key = 'dekiche_academy_secret_key'
 
-# دالة لإنشاء قاعدة البيانات والجداول تلقائياً لمنع ظهور خطأ 500
+# دالة لإنشاء قاعدة البيانات والجداول تلقائياً لضمان عدم حدوث أي أخطاء
 def init_db():
     conn = sqlite3.connect('academy.db')
     cursor = conn.cursor()
@@ -20,7 +20,7 @@ def init_db():
     conn.commit()
     conn.close()
 
-# تشغيل إنشاء قاعدة البيانات عند بدء تشغيل التطبيق
+# تشغيل إنشاء قاعدة البيانات فور تشغيل التطبيق
 init_db()
 
 def get_db_connection():
@@ -28,9 +28,9 @@ def get_db_connection():
     conn.row_factory = sqlite3.Row
     return conn
 
+# الصفحة الرئيسية (محمية: تتطلب تسجيل الدخول)
 @app.route('/')
 def index():
-    # التحقق مما إذا كان المستخدم مسجلاً للدخول أم لا
     if 'role' not in session:
         return redirect(url_for('login'))
         
@@ -47,6 +47,7 @@ def index():
     conn.close()
     return render_template('index.html', lessons=lessons, role=role)
 
+# صفحة تسجيل الدخول بالكود
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -57,7 +58,7 @@ def login():
             session['role'] = 'admin'
             return redirect(url_for('index'))
         elif code and len(code.strip()) > 0:
-            # دخول التلامذة بناء على الكود
+            # دخول التلاميذ بناء على الكود المدخل
             session['role'] = 'student'
             session['student_grade'] = 'السنة الخامسة ابتدائي'
             session['student_subject'] = 'اللغة العربية'
@@ -67,6 +68,7 @@ def login():
             
     return render_template('login.html')
 
+# تسجيل الخروج
 @app.route('/logout')
 def logout():
     session.clear()
