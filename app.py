@@ -4,7 +4,7 @@ from flask import Flask, render_template, request, redirect, url_for, session, f
 app = Flask(__name__)
 app.secret_key = 'dekiche_academy_secret_key'
 
-# دالة لإنشاء قاعدة البيانات والجداول تلقائياً لمنع ظهور أي خطأ
+# دالة لإنشاء قاعدة البيانات والجداول تلقائياً لمنع ظهور خطأ 500
 def init_db():
     conn = sqlite3.connect('academy.db')
     cursor = conn.cursor()
@@ -52,7 +52,7 @@ def login():
     if request.method == 'POST':
         code = request.form.get('code')
         
-        # كلمة سر المشرف (يمكنك تغييرها لاحقاً)
+        # كلمة سر المشرف
         if code == 'admin123':
             session['role'] = 'admin'
             return redirect(url_for('index'))
