@@ -43,13 +43,12 @@ def get_db_connection():
     conn.row_factory = sqlite3.Row
     return conn
 
-# دالة لتوليد كود عشوائي فريد تلقائياً (مثلاً: DK-7842)
+# دالة توليد الأكواد (أرقام وحروف إنجليزية كبيرة فقط - بدون رموز)
 def generate_unique_code():
     conn = get_db_connection()
     while True:
-        letters = ''.join(random.choices(string.ascii_uppercase, k=2))
-        numbers = ''.join(random.choices(string.digits, k=4))
-        code = f"DK-{letters}{numbers}"
+        chars = string.ascii_uppercase + string.digits
+        code = ''.join(random.choices(chars, k=6))
         
         existing = conn.execute('SELECT id FROM access_codes WHERE code = ?', (code,)).fetchone()
         if not existing:
@@ -126,7 +125,7 @@ def lesson_detail(lesson_id):
         
     return render_template('lesson.html', lesson=lesson)
 
-# لوحة تحكم المشرف (توليد الأكواد بالمدة والطور والمادة تلقائياً)
+# لوحة تحكم المشرف
 @app.route('/dashboard', methods=['GET', 'POST'])
 def dashboard():
     if session.get('role') != 'admin':
@@ -152,17 +151,14 @@ def dashboard():
             conn.commit()
             flash('تم إضافة الدرس بنجاح!')
             
-        # توليد كود تلميذ تلقائياً بناءً على المدة المحددة
+        # توليد كود تلميذ تلقائياً
         elif action == 'generate_code':
             student_name = request.form.get('student_name')
             grade = request.form.get('grade')
             subject = request.form.get('subject')
-            duration_days = int(request.form.get('duration_days', 30)) # المدة بالأيام (افتراضي شهر)
+            duration_days = int(request.form.get('duration_days', 30))
             
-            # توليد الكود تلقائياً
             code = generate_unique_code()
-            
-            # حساب تاريخ انتهاء الصلاحية بدقة
             expires_at = (datetime.now() + timedelta(days=duration_days)).strftime('%Y-%m-%d %H:%M:%S')
             
             conn.execute(
@@ -170,7 +166,7 @@ def dashboard():
                 (code, student_name, grade, subject, expires_at)
             )
             conn.commit()
-            flash(f'تم توليد الكود بنجاح للتلميذ {student_name}!')
+            flash(f'تم توليد الكود ({code}) بنجاح للتلميذ {student_name}!')
             
         return redirect(url_for('dashboard'))
         
