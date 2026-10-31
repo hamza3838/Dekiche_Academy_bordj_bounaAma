@@ -125,7 +125,7 @@ def lesson_detail(lesson_id):
         
     return render_template('lesson.html', lesson=lesson)
 
-# لوحة تحكم المشرف
+# لوحة تحكم المشرف (تدعم توليد دفعة أكواد)
 @app.route('/dashboard', methods=['GET', 'POST'])
 def dashboard():
     if session.get('role') != 'admin':
@@ -151,22 +151,31 @@ def dashboard():
             conn.commit()
             flash('تم إضافة الدرس بنجاح!')
             
-        # توليد كود تلميذ تلقائياً
+        # توليد دفعة أكواد تلامذة تلقائياً
         elif action == 'generate_code':
-            student_name = request.form.get('student_name')
+            student_prefix = request.form.get('student_prefix', 'تلميذ')
             grade = request.form.get('grade')
             subject = request.form.get('subject')
             duration_days = int(request.form.get('duration_days', 30))
+            count = int(request.form.get('count', 1))
             
-            code = generate_unique_code()
-            expires_at = (datetime.now() + timedelta(days=duration_days)).strftime('%Y-%m-%d %H:%M:%S')
-            
-            conn.execute(
-                'INSERT INTO access_codes (code, student_name, grade, subject, expires_at) VALUES (?, ?, ?, ?, ?)',
-                (code, student_name, grade, subject, expires_at)
-            )
+            generated_count = 0
+            for i in range(count):
+                code = generate_unique_code()
+                expires_at = (datetime.now() + timedelta(days=duration_days)).strftime('%Y-%m-%d %H:%M:%S')
+                student_name = f"{student_prefix} {i+1}"
+                
+                try:
+                    conn.execute(
+                        'INSERT INTO access_codes (code, student_name, grade, subject, expires_at) VALUES (?, ?, ?, ?, ?)',
+                        (code, student_name, grade, subject, expires_at)
+                    )
+                    generated_count += 1
+                except sqlite3.IntegrityError:
+                    continue
+                    
             conn.commit()
-            flash(f'تم توليد الكود ({code}) بنجاح للتلميذ {student_name}!')
+            flash(f'تم توليد دفعة جديدة بنجاح: {generated_count} كود للطور ({grade} - {subject})!')
             
         return redirect(url_for('dashboard'))
         
