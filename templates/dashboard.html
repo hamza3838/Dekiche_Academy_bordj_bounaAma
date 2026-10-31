@@ -96,14 +96,18 @@
                 </form>
             </div>
 
-            <!-- توليد كود تلميذ تلقائياً -->
+            <!-- توليد دفعة أكواد تلامذة -->
             <div class="card">
-                <h2>توليد كود دخول لتلميذ (آلي)</h2>
+                <h2>توليد دفعة أكواد تلامذة (آلي)</h2>
                 <form method="POST">
                     <input type="hidden" name="action" value="generate_code">
                     <div class="form-group">
-                        <label>اسم التلميذ:</label>
-                        <input type="text" name="student_name" required placeholder="مثال: محمد الأمين">
+                        <label>تسمية مشتركة للتلامذة (مثال: فوج الحصص):</label>
+                        <input type="text" name="student_prefix" value="تلميذ" required>
+                    </div>
+                    <div class="form-group">
+                        <label>عدد الأكواد المراد توليدها (مثلاً: 60):</label>
+                        <input type="number" name="count" value="10" min="1" max="200" required>
                     </div>
                     <div class="form-group">
                         <label>السنة الدراسية المخصصة (الطور):</label>
@@ -121,7 +125,7 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>مدة صلاحية الكود:</label>
+                        <label>مدة صلاحية الأكواد:</label>
                         <select name="duration_days" required>
                             <option value="30">شهر واحد (30 يوم)</option>
                             <option value="90">3 أشهر (فصل دراسي)</option>
@@ -129,12 +133,12 @@
                             <option value="365">سنة كاملة (365 يوم)</option>
                         </select>
                     </div>
-                    <button type="submit">توليد وإصدار الكود تلقائياً ✨</button>
+                    <button type="submit">توليد دفعة الأكواد دفعة واحدة 🚀</button>
                 </form>
             </div>
         </div>
 
-        <!-- جدول استعراض الأكواد مع أزرار النسخ -->
+        <!-- جدول الأكواد -->
         <div class="tables-section">
             <h2>الأكواد المولدة والمفعلة (جاهزة للنسخ والطباعة)</h2>
             <table>
@@ -151,7 +155,7 @@
                 <tbody>
                     {% for c in codes %}
                     <tr>
-                        <td><strong style="color: var(--primary); font-size: 1.1rem;" id="code-{{ c.id }}">{{ c.code }}</strong></td>
+                        <td><strong style="color: var(--primary); font-size: 1.1rem;">{{ c.code }}</strong></td>
                         <td>{{ c.student_name }}</td>
                         <td>{{ c.grade }}</td>
                         <td>{{ c.subject }}</td>
@@ -171,14 +175,12 @@
     </div>
 
     <script>
-        // دالة نسخ الكود للحافظة
         function copyCode(code) {
             navigator.clipboard.writeText(code).then(() => {
                 alert('تم نسخ الكود بنجاح: ' + code);
             });
         }
 
-        // دالة طباعة بطاقة التلميذ
         function printCodeCard(name, code, grade, subject, expiry) {
             let printWindow = window.open('', '_blank', 'width=600,height=400');
             printWindow.document.write(`
