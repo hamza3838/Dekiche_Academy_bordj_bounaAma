@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>دروس أكاديمية دقيش التعليمية</title>
+    <style>
+        body { font-family: Tahoma, sans-serif; background-color: #f4f7f6; margin: 0; padding: 20px; }
+        header { background: #5b21b6; color: white; padding: 15px 25px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0px 2px 5px rgba(0,0,0,0.1); }
+        .header-title h3 { margin: 0; font-size: 18px; }
+        .header-title span { font-size: 12px; color: #e9d5ff; }
+        .container { max-width: 800px; margin: 20px auto; }
+        .lesson-card { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0px 2px 5px rgba(0,0,0,0.05); text-align: center; border-right: 4px solid #5b21b6; }
+        .lesson-card h3 { color: #333; margin-top: 0; }
+        .video-wrapper { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 6px; margin-top: 10px; }
+        .video-wrapper iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+        a.logout { color: white; background: #dc3545; padding: 6px 15px; text-decoration: none; border-radius: 4px; font-size: 14px; }
+        .no-lessons { text-align: center; background: white; padding: 30px; border-radius: 8px; color: #666; }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-title">
+            <h3>أكاديمية دقيش التعليمية - برج بونعامة</h3>
+            <span>مرحباً بك، {{ student_name }} 📚</span>
+        </div>
+        <a href="/logout" class="logout">تسجيل الخروج</a>
+    </header>
+
+    <div class="container">
+        <h2 style="color: #333; text-align: center; margin-bottom: 20px;">الدروس المرئية الخاصة بهذا الشهر</h2>
+
+        {% if lessons %}
+            {% for lesson in lessons %}
+                <div class="lesson-card">
+                    <h3>الدرس {{ lesson.order_num }}: {{ lesson.title }}</h3>
+                    <div class="video-wrapper">
+                        <iframe src="{{ lesson.video_url }}" title="{{ lesson.title }}" frameborder="0" allowfullscreen></iframe>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="no-lessons">
+                <p>لم يتم نشر أي دروس حتى الآن، يرجى العودة لاحقاً.</p>
+            </div>
+        {% endif %}
+    </div>
+</body>
+</html>
