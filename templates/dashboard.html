@@ -37,6 +37,12 @@
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         th, td { padding: 12px; text-align: right; border-bottom: 1px solid #eee; font-size: 0.95rem; }
         th { background: #e7f1ff; color: var(--primary-dark); }
+        
+        .btn-action { padding: 5px 10px; font-size: 0.85rem; border-radius: 5px; border: none; cursor: pointer; font-weight: bold; margin-left: 5px; }
+        .btn-copy { background: #198754; color: white; }
+        .btn-copy:hover { background: #157347; }
+        .btn-print { background: #6c757d; color: white; }
+        .btn-print:hover { background: #5c636a; }
     </style>
 </head>
 <body>
@@ -58,7 +64,7 @@
         {% endwith %}
 
         <div class="grid-section">
-            <!-- نموذج إضافة درس -->
+            <!-- إضافة درس جديد -->
             <div class="card">
                 <h2>إضافة درس جديد</h2>
                 <form method="POST">
@@ -68,7 +74,7 @@
                         <input type="text" name="title" required placeholder="مثال: الجملة الفعليّة">
                     </div>
                     <div class="form-group">
-                        <label>السنة الدراسية:</label>
+                        <label>السنة الدراسية (الطور):</label>
                         <select name="grade" required>
                             <option value="السنة الخامسة ابتدائي">السنة الخامسة ابتدائي</option>
                             <option value="السنة الرابعة ابتدائي">السنة الرابعة ابتدائي</option>
@@ -90,21 +96,17 @@
                 </form>
             </div>
 
-            <!-- نموذج توليد كود تلميذ -->
+            <!-- توليد كود تلميذ تلقائياً -->
             <div class="card">
-                <h2>إضافة كود دخول لتلميذ</h2>
+                <h2>توليد كود دخول لتلميذ (آلي)</h2>
                 <form method="POST">
-                    <input type="hidden" name="action" value="add_code">
-                    <div class="form-group">
-                        <label>رمز الكود (مثلاً: 501):</label>
-                        <input type="text" name="code" required placeholder="أدخل كود فريد">
-                    </div>
+                    <input type="hidden" name="action" value="generate_code">
                     <div class="form-group">
                         <label>اسم التلميذ:</label>
                         <input type="text" name="student_name" required placeholder="مثال: محمد الأمين">
                     </div>
                     <div class="form-group">
-                        <label>السنة الدراسية المخصصة:</label>
+                        <label>السنة الدراسية المخصصة (الطور):</label>
                         <select name="grade" required>
                             <option value="السنة الخامسة ابتدائي">السنة الخامسة ابتدائي</option>
                             <option value="السنة الرابعة ابتدائي">السنة الرابعة ابتدائي</option>
@@ -119,38 +121,48 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>تاريخ انتهاء الصلاحية:</label>
-                        <input type="text" name="expires_at" value="2026-12-31 23:59:59" required>
+                        <label>مدة صلاحية الكود:</label>
+                        <select name="duration_days" required>
+                            <option value="30">شهر واحد (30 يوم)</option>
+                            <option value="90">3 أشهر (فصل دراسي)</option>
+                            <option value="180">6 أشهر (نصف سنة)</option>
+                            <option value="365">سنة كاملة (365 يوم)</option>
+                        </select>
                     </div>
-                    <button type="submit">إصدار الكود</button>
+                    <button type="submit">توليد وإصدار الكود تلقائياً ✨</button>
                 </form>
             </div>
         </div>
 
-        <!-- جدول الأكواد الحالي -->
+        <!-- جدول استعراض الأكواد مع أزرار النسخ -->
         <div class="tables-section">
-            <h2>الأكواد المفعلة حالياً في المنصة</h2>
+            <h2>الأكواد المولدة والمفعلة (جاهزة للنسخ والطباعة)</h2>
             <table>
                 <thead>
                     <tr>
-                        <th>الكود</th>
+                        <th>الكود الآلي</th>
                         <th>اسم التلميذ</th>
-                        <th>السنة</th>
+                        <th>السنة (الطور)</th>
                         <th>المادة</th>
-                        <th>تاريخ الصلاحية</th>
+                        <th>صالح حتى</th>
+                        <th>إجراءات</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for c in codes %}
                     <tr>
-                        <td><strong>{{ c.code }}</strong></td>
+                        <td><strong style="color: var(--primary); font-size: 1.1rem;" id="code-{{ c.id }}">{{ c.code }}</strong></td>
                         <td>{{ c.student_name }}</td>
                         <td>{{ c.grade }}</td>
                         <td>{{ c.subject }}</td>
                         <td>{{ c.expires_at }}</td>
+                        <td>
+                            <button type="button" class="btn-action btn-copy" onclick="copyCode('{{ c.code }}')">نسخ 📋</button>
+                            <button type="button" class="btn-action btn-print" onclick="printCodeCard('{{ c.student_name }}', '{{ c.code }}', '{{ c.grade }}', '{{ c.subject }}', '{{ c.expires_at }}')">طباعة 🖨️</button>
+                        </td>
                     </tr>
                     {% else %}
-                    <tr><td colspan="5" style="text-align: center; color: #777;">لا توجد أكواد مضافة.</td></tr>
+                    <tr><td colspan="6" style="text-align: center; color: #777;">لا توجد أكواد مولدة بعد.</td></tr>
                     {% endfor %}
                 </tbody>
             </table>
@@ -158,5 +170,51 @@
 
     </div>
 
+    <script>
+        // دالة نسخ الكود للحافظة
+        function copyCode(code) {
+            navigator.clipboard.writeText(code).then(() => {
+                alert('تم نسخ الكود بنجاح: ' + code);
+            });
+        }
+
+        // دالة طباعة بطاقة التلميذ
+        function printCodeCard(name, code, grade, subject, expiry) {
+            let printWindow = window.open('', '_blank', 'width=600,height=400');
+            printWindow.document.write(`
+                <html lang="ar" dir="rtl">
+                <head>
+                    <title>بطاقة دخول تلميذ - أكاديمية دقيش</title>
+                    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+                    <style>
+                        body { font-family: 'Tajawal', sans-serif; text-align: center; padding: 30px; }
+                        .card { border: 3px dashed #0d6efd; padding: 30px; border-radius: 15px; max-width: 400px; margin: auto; background: #f8f9fa; }
+                        h2 { color: #0d6efd; margin-bottom: 5px; }
+                        p { font-size: 1.1rem; margin: 10px 0; }
+                        .code-box { background: #0d6efd; color: white; font-size: 1.8rem; padding: 10px; border-radius: 8px; font-weight: bold; letter-spacing: 2px; margin: 20px 0; }
+                        .footer { font-size: 0.85rem; color: #666; margin-top: 20px; }
+                    </style>
+                </head>
+                <body>
+                    <div class="card">
+                        <h2>أكاديمية دقيش</h2>
+                        <p>بطاقة الولوج للدروس الخصوصية</p>
+                        <hr style="border: 0; border-top: 1px solid #ccc; margin: 15px 0;">
+                        <p><strong>التلميذ(ة):</strong> ${name}</p>
+                        <p><strong>الطور:</strong> ${grade}</p>
+                        <p><strong>المادة:</strong> ${subject}</p>
+                        <div class="code-box">${code}</div>
+                        <p>صالحة لغاية: ${expiry}</p>
+                        <div class="footer">أستاذ المادة: حمزة عباد | برج بوعنامة</div>
+                    </div>
+                    <script>
+                        window.onload = function() { window.print(); window.close(); }
+                    <\/script>
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+        }
+    </script>
 </body>
 </html>
