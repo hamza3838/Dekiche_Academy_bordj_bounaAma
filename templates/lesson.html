@@ -21,6 +21,10 @@
         .lesson-meta { display: flex; gap: 15px; margin-bottom: 25px; font-size: 0.95rem; color: #6c757d; }
         .badge { background: #e7f1ff; color: #0a58ca; padding: 4px 12px; border-radius: 12px; font-weight: 500; }
         
+        /* تنسيق مشغل فيديو يوتيوب المتجاوب */
+        .video-container { position: relative; width: 100%; padding-bottom: 56.25%; height: 0; margin: 25px 0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1); background: #000; }
+        .video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
+        
         .lesson-content { line-height: 1.8; font-size: 1.1rem; color: #444; margin-top: 20px; white-space: pre-line; }
     </style>
 </head>
@@ -40,11 +44,37 @@
                 <span class="badge">المادة: {{ lesson.subject }}</span>
             </div>
             
-            <div class="lesson-content">
-                {{ lesson.description or 'لا يوجد تفاصيل إضافية لهذا الدرس.' }}
+            <!-- قسم عرض فيديو اليوتيوب إن وجد رابط -->
+            <div id="youtube-player-box"></div>
+            
+            <div class="lesson-content" id="lesson-desc">
+                {{ lesson.description or '' }}
             </div>
         </div>
     </div>
+
+    <script>
+        // دالة ذكية تستخرج رابط يوتيوب من وصف الدرس وتولّد له مشغل فيديو تلقائياً
+        let descText = document.getElementById('lesson-desc').innerText;
+        
+        // تعبير رغامي (Regex) لاكتشاف روابط يوتيوب العادية أو المختصرة
+        let youtubeRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+        let match = descText.match(youtubeRegex);
+
+        if (match && match[1]) {
+            let videoId = match[1];
+            // إنشاء عنصر الـ iframe لعرض الفيديو
+            let playerDiv = document.getElementById('youtube-player-box');
+            playerDiv.innerHTML = `
+                <div class="video-container">
+                    <iframe src="https://www.youtube.com/embed/${videoId}" allowfullscreen></iframe>
+                </div>
+            `;
+            
+            // إزالة رابط يوتيوب النصي من الوصف لتجنب التكرار وترك الملاحظات الكتابية وحدها
+            document.getElementById('lesson-desc').innerText = descText.replace(match[0], '').trim();
+        }
+    </script>
 
 </body>
 </html>
