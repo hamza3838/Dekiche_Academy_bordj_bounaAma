@@ -4,7 +4,7 @@ from flask import Flask, render_template, request, redirect, url_for, session, f
 app = Flask(__name__)
 app.secret_key = 'dekiche_academy_secret_key'
 
-# دالة لإنشاء قاعدة البيانات والجداول تلقائياً لمنع ظهور خطأ 500
+# دالة لإنشاء قاعدة البيانات والجداول تلقائياً لمنع ظهور أي خطأ
 def init_db():
     conn = sqlite3.connect('academy.db')
     cursor = conn.cursor()
@@ -30,6 +30,10 @@ def get_db_connection():
 
 @app.route('/')
 def index():
+    # التحقق مما إذا كان المستخدم مسجلاً للدخول أم لا
+    if 'role' not in session:
+        return redirect(url_for('login'))
+        
     role = session.get('role', 'student')
     conn = get_db_connection()
     
@@ -43,10 +47,30 @@ def index():
     conn.close()
     return render_template('index.html', lessons=lessons, role=role)
 
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        code = request.form.get('code')
+        
+        # كلمة سر المشرف (يمكنك تغييرها لاحقاً)
+        if code == 'admin123':
+            session['role'] = 'admin'
+            return redirect(url_for('index'))
+        elif code and len(code.strip()) > 0:
+            # دخول التلامذة بناء على الكود
+            session['role'] = 'student'
+            session['student_grade'] = 'السنة الخامسة ابتدائي'
+            session['student_subject'] = 'اللغة العربية'
+            return redirect(url_for('index'))
+        else:
+            flash('الرجاء إدخال رمز صحيح')
+            
+    return render_template('login.html')
+
 @app.route('/logout')
 def logout():
     session.clear()
-    return redirect(url_for('index'))
+    return redirect(url_for('login'))
 
 if __name__ == '__main__':
     app.run(debug=True)
