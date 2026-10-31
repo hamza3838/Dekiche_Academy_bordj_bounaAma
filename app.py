@@ -1,5 +1,7 @@
 import sqlite3
-from datetime import datetime
+import random
+import string
+from datetime import datetime, timedelta
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 
 app = Flask(__name__)
@@ -10,7 +12,6 @@ def init_db():
     conn = sqlite3.connect('academy.db')
     cursor = conn.cursor()
     
-    # جدول الدروس
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS lessons (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -21,7 +22,6 @@ def init_db():
         )
     ''')
     
-    # جدول الأكواد والمستخدمين
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS access_codes (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -33,12 +33,6 @@ def init_db():
         )
     ''')
     
-    # كود تجريبي ينشأ تلقائياً عند التشغيل الأول
-    cursor.execute('''
-        INSERT OR IGNORE INTO access_codes (code, student_name, grade, subject, expires_at)
-        VALUES (?, ?, ?, ?, ?)
-    ''', ('12345', 'حمزة عباد', 'السنة الخامسة ابتدائي', 'اللغة العربية', '2026-12-31 23:59:59'))
-    
     conn.commit()
     conn.close()
 
@@ -49,7 +43,20 @@ def get_db_connection():
     conn.row_factory = sqlite3.Row
     return conn
 
-# الصفحة الرئيسية للتلميذ (عرض دروسه المخصصة)
+# دالة لتوليد كود عشوائي فريد تلقائياً (مثلاً: DK-7842)
+def generate_unique_code():
+    conn = get_db_connection()
+    while True:
+        letters = ''.join(random.choices(string.ascii_uppercase, k=2))
+        numbers = ''.join(random.choices(string.digits, k=4))
+        code = f"DK-{letters}{numbers}"
+        
+        existing = conn.execute('SELECT id FROM access_codes WHERE code = ?', (code,)).fetchone()
+        if not existing:
+            conn.close()
+            return code
+
+# الصفحة الرئيسية للتلميذ
 @app.route('/')
 def index():
     if 'role' not in session:
@@ -75,15 +82,13 @@ def index():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        code = request.form.get('code', '').strip()
+        code = request.form.get('code', '').strip().upper()
         
-        # دخول المشرف العام
-        if code == 'admin123':
+        if code == 'ADMIN123':
             session['role'] = 'admin'
             session['student_name'] = 'المشرف العام'
             return redirect(url_for('dashboard'))
             
-        # التحقق من كود التلميذ
         conn = get_db_connection()
         code_data = conn.execute(
             'SELECT * FROM access_codes WHERE code = ?', (code,)
@@ -105,7 +110,7 @@ def login():
             
     return render_template('student_login.html')
 
-# صفحة عرض تفاصيل الدرس الواحد
+# صفحة تفاصيل الدرس
 @app.route('/lesson/<int:lesson_id>')
 def lesson_detail(lesson_id):
     if 'role' not in session:
@@ -121,7 +126,7 @@ def lesson_detail(lesson_id):
         
     return render_template('lesson.html', lesson=lesson)
 
-# لوحة تحكم المشرف
+# لوحة تحكم المشرف (توليد الأكواد بالمدة والطور والمادة تلقائياً)
 @app.route('/dashboard', methods=['GET', 'POST'])
 def dashboard():
     if session.get('role') != 'admin':
@@ -147,40 +152,40 @@ def dashboard():
             conn.commit()
             flash('تم إضافة الدرس بنجاح!')
             
-        # إضافة كود تلميذ جديد
-        elif action == 'add_code':
-            code = request.form.get('code')
+        # توليد كود تلميذ تلقائياً بناءً على المدة المحددة
+        elif action == 'generate_code':
             student_name = request.form.get('student_name')
             grade = request.form.get('grade')
             subject = request.form.get('subject')
-            expires_at = request.form.get('expires_at')
+            duration_days = int(request.form.get('duration_days', 30)) # المدة بالأيام (افتراضي شهر)
             
-            try:
-                conn.execute(
-                    'INSERT INTO access_codes (code, student_name, grade, subject, expires_at) VALUES (?, ?, ?, ?, ?)',
-                    (code, student_name, grade, subject, expires_at)
-                )
-                conn.commit()
-                flash('تم إنشاء كود التلميذ بنجاح!')
-            except sqlite3.IntegrityError:
-                flash('هذا الكود موجود مسبقاً، يرجى اختيار رمز آخر.')
-                
+            # توليد الكود تلقائياً
+            code = generate_unique_code()
+            
+            # حساب تاريخ انتهاء الصلاحية بدقة
+            expires_at = (datetime.now() + timedelta(days=duration_days)).strftime('%Y-%m-%d %H:%M:%S')
+            
+            conn.execute(
+                'INSERT INTO access_codes (code, student_name, grade, subject, expires_at) VALUES (?, ?, ?, ?, ?)',
+                (code, student_name, grade, subject, expires_at)
+            )
+            conn.commit()
+            flash(f'تم توليد الكود بنجاح للتلميذ {student_name}!')
+            
         return redirect(url_for('dashboard'))
         
     lessons = conn.execute('SELECT * FROM lessons').fetchall()
-    codes = conn.execute('SELECT * FROM access_codes').fetchall()
+    codes = conn.execute('SELECT * FROM access_codes ORDER BY id DESC').fetchall()
     conn.close()
     
     return render_template('dashboard.html', lessons=lessons, codes=codes)
 
-# صفحة الملف الشخصي
 @app.route('/profile')
 def profile():
     if 'role' not in session:
         return redirect(url_for('login'))
     return render_template('profile.html')
 
-# تسجيل الخروج
 @app.route('/logout')
 def logout():
     session.clear()
