@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم - أكاديمية دقيش</title>
+    <style>
+        body { font-family: Tahoma, sans-serif; background: #f4f7f6; margin: 0; padding: 20px; direction: rtl; text-align: right; }
+        .container { max-width: 900px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        h1, h2 { color: #333; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, select, textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
+        button { background: #28a745; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; }
+        button:hover { background: #218838; }
+        .flash { background: #d4edda; color: #155724; padding: 10px; border-radius: 5px; margin-bottom: 15px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: center; }
+        th { background: #007bff; color: white; }
+        .btn-danger { background: #dc3545; color: white; padding: 5px 10px; text-decoration: none; border-radius: 3px; }
+        .btn-danger:hover { background: #c82333; }
+        .section-box { background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 25px; border: 1px solid #e1e1e1; }
+        .logout-btn { float: left; background: #6c757d; color: white; padding: 8px 15px; text-decoration: none; border-radius: 5px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <a href="/logout" class="logout-btn">تسجيل الخروج</a>
+    <h1>لوحة تحكم الأستاذ - أكاديمية دقيش</h1>
+    <hr>
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        {% for message in messages %}
+          <div class="flash">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <!-- قسم إضافة درس جديد -->
+    <div class="section-box">
+        <h2>إضافة درس جديد وتصنيفه</h2>
+        <form method="POST">
+            <input type="hidden" name="action" value="add_lesson">
+            
+            <div class="form-group">
+                <label>عنوان الدرس:</label>
+                <input type="text" name="title" placeholder="مثال: الجمع باحتفاظ" required>
+            </div>
+
+            <div class="form-group">
+                <label>السنة الدراسية:</label>
+                <select name="grade" required>
+                    <option value="">-- اختر السنة الدراسية --</option>
+                    <option value="السنة الأولى ابتدائي">السنة الأولى ابتدائي</option>
+                    <option value="السنة الثانية ابتدائي">السنة الثانية ابتدائي</option>
+                    <option value="السنة الثالثة ابتدائي">السنة الثالثة ابتدائي</option>
+                    <option value="السنة الرابعة ابتدائي">السنة الرابعة ابتدائي</option>
+                    <option value="السنة الخامسة ابتدائي">السنة الخامسة ابتدائي</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>المادة:</label>
+                <select name="subject" required>
+                    <option value="">-- اختر المادة --</option>
+                    <option value="اللغة العربية">اللغة العربية</option>
+                    <option value="الرياضيات">الرياضيات</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>رابط فيديو يوتيوب (غير مدرج / Unlisted):</label>
+                <input type="text" name="video_url" placeholder="https://www.youtube.com/watch?..." required>
+            </div>
+
+            <div class="form-group">
+                <label>وصف الدرس (اختياري):</label>
+                <textarea name="description" rows="3" placeholder="ملاحظات حول الدرس..."></textarea>
+            </div>
+            
+            <button type="submit">حفظ الدرس في المنصة</button>
+        </form>
+    </div>
+
+    <!-- قسم إضافة أكواد التلاميذ المخصصة -->
+    <div class="section-box">
+        <h2>إدارة وتوليد أكواد التلاميذ (مخصصة حسب السنة والمادة)</h2>
+        <form method="POST">
+            <input type="hidden" name="action" value="add_code">
+            
+            <div class="form-group">
+                <label>كود التلميذ:</label>
+                <input type="text" name="code" placeholder="مثال: 5AP-AR-101" required>
+            </div>
+
+            <div class="form-group">
+                <label>اسم التلميذ (اختياري):</label>
+                <input type="text" name="student_name" placeholder="اسم ولقب التلميذ">
+            </div>
+
+            <div class="form-group">
+                <label>تخصيص السنة الدراسية للتلميذ:</label>
+                <select name="grade" required>
+                    <option value="">-- اختر السنة الدراسية --</option>
+                    <option value="السنة الأولى ابتدائي">السنة الأولى ابتدائي</option>
+                    <option value="السنة الثانية ابتدائي">السنة الثانية ابتدائي</option>
+                    <option value="السنة الثالثة ابتدائي">السنة الثالثة ابتدائي</option>
+                    <option value="السنة الرابعة ابتدائي">السنة الرابعة ابتدائي</option>
+                    <option value="السنة الخامسة ابتدائي">السنة الخامسة ابتدائي</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>تخصيص المادة للتلميذ:</label>
+                <select name="subject" required>
+                    <option value="">-- اختر المادة --</option>
+                    <option value="اللغة العربية">اللغة العربية</option>
+                    <option value="الرياضيات">الرياضيات</option>
+                </select>
+            </div>
+            
+            <button type="submit" style="background: #17a2b8;">حفظ الكود المخصص للأبد</button>
+        </form>
+
+        <h3 style="margin-top: 20px;">الأكواد المسجلة وتخصيصاتها</h3>
+        <table>
+            <tr>
+                <th>الكود</th>
+                <th>التلميذ</th>
+                <th>السنة</th>
+                <th>المادة</th>
+                <th>إجراء</th>
+            </tr>
+            {% for c in codes %}
+            <tr>
+                <td>{{ c.code }}</td>
+                <td>{{ c.student_name or 'غير محدد' }}</td>
+                <td>{{ c.grade }}</td>
+                <td>{{ c.subject }}</td>
+                <td><a href="/admin/delete_code/{{ c.id }}" class="btn-danger">حذف</a></td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="5">لا توجد أكواد مسجلة حتى الآن.</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+
+    <!-- جدول عرض الدروس المضافة -->
+    <div class="section-box">
+        <h2>الدروس الحالية في المنصة</h2>
+        <table>
+            <tr>
+                <th>العنوان</th>
+                <th>السنة</th>
+                <th>المادة</th>
+                <th>إجراء</th>
+            </tr>
+            {% for lesson in lessons %}
+            <tr>
+                <td>{{ lesson.title }}</td>
+                <td>{{ lesson.grade }}</td>
+                <td>{{ lesson.subject }}</td>
+                <td><a href="/admin/delete_lesson/{{ lesson.id }}" class="btn-danger">حذف</a></td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="4">لا توجد دروس مضافة حتى الآن.</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+
+</div>
+
+</body>
+</html>
