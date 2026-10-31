@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>أكاديمية دقيش - برج بوعنامة</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary: #0d6efd; --bg: #f4f7f6; --text: #2b2b2b; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Tajawal', sans-serif; }
+        body { background-color: var(--bg); color: var(--text); }
+        
+        header { background: linear-gradient(135deg, #0d6efd, #0b5ed7); color: white; padding: 25px 20px; text-align: center; position: relative; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .header-content { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+        .logo-img { width: 100px; height: 100px; border-radius: 50%; background: white; padding: 3px; box-shadow: 0 3px 8px rgba(0,0,0,0.2); }
+        .header-actions { position: absolute; top: 20px; left: 20px; display: flex; gap: 10px; }
+        .btn-header { background: rgba(255,255,255,0.2); color: white; padding: 6px 14px; border-radius: 20px; text-decoration: none; font-weight: bold; font-size: 0.85rem; transition: 0.3s; }
+        .btn-header:hover { background: rgba(255,255,255,0.3); }
+        .logout-btn { background: #dc3545; }
+        
+        .container { max-width: 1000px; margin: 30px auto; padding: 0 20px; }
+        
+        .welcome-card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 25px; border-right: 5px solid var(--primary); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+        .welcome-card h3 { color: var(--primary); font-size: 1.2rem; }
+        .student-info { background: #e7f1ff; color: #0a58ca; padding: 5px 12px; border-radius: 15px; font-weight: 500; font-size: 0.9rem; }
+        
+        .section-title { font-size: 1.4rem; font-weight: 700; margin-bottom: 15px; border-bottom: 3px solid var(--primary); display: inline-block; padding-bottom: 3px; }
+        .lessons-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+        .lesson-card { background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 3px 10px rgba(0,0,0,0.05); border: 1px solid #eee; transition: 0.3s; }
+        .lesson-card:hover { transform: translateY(-3px); box-shadow: 0 6px 15px rgba(0,0,0,0.1); }
+        .lesson-header { background: #e7f1ff; padding: 12px 15px; border-bottom: 1px solid #d0e2ff; }
+        .lesson-header h4 { color: #0a58ca; }
+        .lesson-body { padding: 15px; color: #6c757d; font-size: 0.95rem; }
+        
+        .no-lessons { text-align: center; background: white; padding: 30px; border-radius: 10px; color: #6c757d; grid-column: 1 / -1; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-actions">
+            <a href="{{ url_for('profile') }}" class="btn-header">الملف الشخصي</a>
+            <a href="{{ url_for('logout') }}" class="btn-header logout-btn">خروج</a>
+        </div>
+        <div class="header-content">
+            <img src="{{ url_for('static', filename='Logo.png') }}" alt="شعار الأكاديمية" class="logo-img">
+            <h1>أكاديمية دقيش - برج بوعنامة</h1>
+            <p>منصة التعليم الابتدائي المتخصصة</p>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="welcome-card">
+            <h3>أهلاً بك يا بطل: {{ session.get('student_name', 'مستخدم') }} 👋</h3>
+            {% if session.get('role') == 'student' %}
+                <div class="student-info">
+                    {{ session.get('student_grade') }} | {{ session.get('student_subject') }}
+                </div>
+            {% else %}
+                <div class="student-info">حساب المشرف العام</div>
+            {% endif %}
+        </div>
+
+        <h2 class="section-title">قائمة الدروس المتاحة</h2>
+
+        <div class="lessons-grid">
+            {% if lessons %}
+                {% for lesson in lessons %}
+                    <a href="{{ url_for('lesson_detail', lesson_id=lesson.id) }}" style="text-decoration: none; color: inherit;">
+                        <div class="lesson-card">
+                            <div class="lesson-header">
+                                <h4>{{ lesson.title }}</h4>
+                            </div>
+                            <div class="lesson-body">
+                                <p>{{ lesson.description[:90] + '...' if lesson.description and lesson.description|length > 90 else (lesson.description or 'انقر لعرض تفاصيل الدرس.') }}</p>
+                            </div>
+                        </div>
+                    </a>
+                {% endfor %}
+            {% else %}
+                <div class="no-lessons">
+                    <p>📚 لا توجد دروس مضافة حالياً لهذا القسم.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم - أكاديمية دقيش</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary: #0d6efd; --primary-dark: #0a58ca; --bg: #f4f7f6; --text: #2b2b2b; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Tajawal', sans-serif; }
+        body { background-color: var(--bg); color: var(--text); }
+        
+        header { background: linear-gradient(135deg, #0d6efd, #0b5ed7); color: white; padding: 25px 20px; text-align: center; position: relative; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .logo-img { width: 80px; height: 80px; border-radius: 50%; background: white; padding: 2px; position: absolute; right: 20px; top: 15px; }
+        .logout-btn { position: absolute; left: 20px; top: 25px; background: #dc3545; color: white; padding: 8px 18px; border-radius: 20px; text-decoration: none; font-weight: bold; font-size: 0.9rem; }
+        
+        .container { max-width: 1100px; margin: 30px auto; padding: 0 20px; }
+        .flash-msg { background: #d1e7dd; color: #0f5132; padding: 12px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #badbcc; font-weight: 500; text-align: center; }
+        
+        .grid-section { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 40px; }
+        @media(max-width: 768px) { .grid-section { grid-template-columns: 1fr; } }
+        
+        .card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .card h2 { color: var(--primary-dark); font-size: 1.4rem; margin-bottom: 20px; border-bottom: 2px solid #e7f1ff; padding-bottom: 8px; }
+        
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: 700; font-size: 0.9rem; color: #444; }
+        input, select, textarea { width: 100%; padding: 10px 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 0.95rem; outline: none; transition: 0.3s; }
+        input:focus, select:focus, textarea:focus { border-color: var(--primary); }
+        textarea { resize: vertical; height: 90px; }
+        
+        button { background: var(--primary); color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 10px; }
+        button:hover { background: var(--primary-dark); }
+        
+        .tables-section { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-top: 30px; }
+        .tables-section h2 { color: var(--primary-dark); margin-bottom: 15px; font-size: 1.4rem; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 12px; text-align: right; border-bottom: 1px solid #eee; font-size: 0.95rem; }
+        th { background: #e7f1ff; color: var(--primary-dark); }
+    </style>
+</head>
+<body>
+
+    <header>
+        <img src="{{ url_for('static', filename='Logo.png') }}" alt="الشعار" class="logo-img">
+        <a href="{{ url_for('logout') }}" class="logout-btn">تسجيل الخروج</a>
+        <h1>لوحة تحكم المشرف - أكاديمية دقيش</h1>
+    </header>
+
+    <div class="container">
+        
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            {% for message in messages %}
+              <div class="flash-msg">{{ message }}</div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <div class="grid-section">
+            <!-- نموذج إضافة درس -->
+            <div class="card">
+                <h2>إضافة درس جديد</h2>
+                <form method="POST">
+                    <input type="hidden" name="action" value="add_lesson">
+                    <div class="form-group">
+                        <label>عنوان الدرس:</label>
+                        <input type="text" name="title" required placeholder="مثال: الجملة الفعليّة">
+                    </div>
+                    <div class="form-group">
+                        <label>السنة الدراسية:</label>
+                        <select name="grade" required>
+                            <option value="السنة الخامسة ابتدائي">السنة الخامسة ابتدائي</option>
+                            <option value="السنة الرابعة ابتدائي">السنة الرابعة ابتدائي</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>المادة:</label>
+                        <select name="subject" required>
+                            <option value="اللغة العربية">اللغة العربية</option>
+                            <option value="الرياضيات">الرياضيات</option>
+                            <option value="التربية الإسلامية">التربية الإسلامية</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>وصف أو محتوى الدرس:</label>
+                        <textarea name="description" placeholder="اكتب تفاصيل أو رابط الشرح هنا..."></textarea>
+                    </div>
+                    <button type="submit">حفظ وإضافة الدرس</button>
+                </form>
+            </div>
+
+            <!-- نموذج توليد كود تلميذ -->
+            <div class="card">
+                <h2>إضافة كود دخول لتلميذ</h2>
+                <form method="POST">
+                    <input type="hidden" name="action" value="add_code">
+                    <div class="form-group">
+                        <label>رمز الكود (مثلاً: 501):</label>
+                        <input type="text" name="code" required placeholder="أدخل كود فريد">
+                    </div>
+                    <div class="form-group">
+                        <label>اسم التلميذ:</label>
+                        <input type="text" name="student_name" required placeholder="مثال: محمد الأمين">
+                    </div>
+                    <div class="form-group">
+                        <label>السنة الدراسية المخصصة:</label>
+                        <select name="grade" required>
+                            <option value="السنة الخامسة ابتدائي">السنة الخامسة ابتدائي</option>
+                            <option value="السنة الرابعة ابتدائي">السنة الرابعة ابتدائي</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>المادة المخصصة:</label>
+                        <select name="subject" required>
+                            <option value="اللغة العربية">اللغة العربية</option>
+                            <option value="الرياضيات">الرياضيات</option>
+                            <option value="التربية الإسلامية">التربية الإسلامية</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>تاريخ انتهاء الصلاحية:</label>
+                        <input type="text" name="expires_at" value="2026-12-31 23:59:59" required>
+                    </div>
+                    <button type="submit">إصدار الكود</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- جدول الأكواد الحالي -->
+        <div class="tables-section">
+            <h2>الأكواد المفعلة حالياً في المنصة</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>الكود</th>
+                        <th>اسم التلميذ</th>
+                        <th>السنة</th>
+                        <th>المادة</th>
+                        <th>تاريخ الصلاحية</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for c in codes %}
+                    <tr>
+                        <td><strong>{{ c.code }}</strong></td>
+                        <td>{{ c.student_name }}</td>
+                        <td>{{ c.grade }}</td>
+                        <td>{{ c.subject }}</td>
+                        <td>{{ c.expires_at }}</td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="5" style="text-align: center; color: #777;">لا توجد أكواد مضافة.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+</body>
+</html>
