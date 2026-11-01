@@ -7,7 +7,7 @@ from flask import Flask, render_template, request, redirect, url_for, session, f
 app = Flask(__name__)
 app.secret_key = 'dekiche_academy_secret_key_2026'
 
-# إنشاء قاعدة البيانات والجداول تلقائياً
+# إنشاء قاعدة البيانات والجداول وتعبئة دروس افتراضية لضمان عدم ضياعها أبدًا
 def init_db():
     conn = sqlite3.connect('academy.db')
     cursor = conn.cursor()
@@ -33,6 +33,27 @@ def init_db():
         )
     ''')
     
+    # التحقق مما إذا كانت جدول الدروس فارغاً، لنقوم بإضافة دروس أساسية افتراضية لا تختفي أبدًا
+    cursor.execute('SELECT COUNT(*) FROM lessons')
+    if cursor.fetchone()[0] == 0:
+        default_lessons = [
+            ('مراجعة شاملة في قواعد اللغة العربية', 'السنة الخامسة ابتدائي', 'اللغة العربية', 'https://youtu.be/dQw4w9WgXcQ\nدروس الدعم الخاصة بالطور الابتدائي - الفصل الأول.'),
+            ('القسمة الإقليدية واللائحة العشرية', 'السنة الخامسة ابتدائي', 'الرياضيات', 'https://youtu.be/dQw4w9WgXcQ\nشرح مبسط لحل مسائل القسمة.'),
+            ('أركان الإيمان والإحسان', 'السنة الرابعة ابتدائي', 'التربية الإسلامية', 'https://youtu.be/dQw4w9WgXcQ\nدرس تربوي شامل للتلاميذ.')
+        ]
+        cursor.executemany(
+            'INSERT INTO lessons (title, grade, subject, description) VALUES (?, ?, ?, ?)',
+            default_lessons
+        )
+        
+    # إضافة كود تجريبي افتراضي للتلاميذ إن لم يوجد أي كود
+    cursor.execute('SELECT COUNT(*) FROM access_codes')
+    if cursor.fetchone()[0] == 0:
+        cursor.execute(
+            'INSERT INTO access_codes (code, student_name, grade, subject, expires_at) VALUES (?, ?, ?, ?, ?)',
+            ('DEMO55', 'تلميذ تجريبي', 'السنة الخامسة ابتدائي', 'اللغة العربية', (datetime.now() + timedelta(days=365)).strftime('%Y-%m-%d %H:%M:%S'))
+        )
+        
     conn.commit()
     conn.close()
 
@@ -43,7 +64,7 @@ def get_db_connection():
     conn.row_factory = sqlite3.Row
     return conn
 
-# دالة توليد الأكواد (أرقام وحروف إنجليزية كبيرة فقط - بدون رموز)
+# دالة توليد الأكواد (أرقام وحروف إنجليزية كبيرة فقط)
 def generate_unique_code():
     conn = get_db_connection()
     while True:
@@ -55,7 +76,7 @@ def generate_unique_code():
             conn.close()
             return code
 
-# الصفحة الرئيسية للتلميذ
+# الصفحة الرئيسية (تعرض دروس التلميذ الخاص بها حصرياً، أو كل الدروس للأدمن)
 @app.route('/')
 def index():
     if 'role' not in session:
@@ -67,17 +88,19 @@ def index():
     if role == 'student':
         grade = session.get('student_grade', '')
         subject = session.get('student_subject', '')
+        # جلب الدروس التي تطابق تماماً طور ومادة التلميذ فقط
         lessons = conn.execute(
             'SELECT * FROM lessons WHERE grade = ? AND subject = ?', 
             (grade, subject)
         ).fetchall()
     else:
+        # الأدمن يرى كل الدروس التي رفعها
         lessons = conn.execute('SELECT * FROM lessons').fetchall()
         
     conn.close()
     return render_template('index.html', lessons=lessons)
 
-# صفحة تسجيل دخول التلامذة
+# صفحة تسجيل الدخول
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -125,7 +148,7 @@ def lesson_detail(lesson_id):
         
     return render_template('lesson.html', lesson=lesson)
 
-# لوحة تحكم المشرف (تدعم توليد دفعة أكواد)
+# لوحة تحكم المشرف
 @app.route('/dashboard', methods=['GET', 'POST'])
 def dashboard():
     if session.get('role') != 'admin':
@@ -137,7 +160,6 @@ def dashboard():
     if request.method == 'POST':
         action = request.form.get('action')
         
-        # إضافة درس جديد
         if action == 'add_lesson':
             title = request.form.get('title')
             grade = request.form.get('grade')
@@ -149,9 +171,8 @@ def dashboard():
                 (title, grade, subject, description)
             )
             conn.commit()
-            flash('تم إضافة الدرس بنجاح!')
+            flash('تم إضافة الدرس وحفظه بنجاح!')
             
-        # توليد دفعة أكواد تلامذة تلقائياً
         elif action == 'generate_code':
             student_prefix = request.form.get('student_prefix', 'تلميذ')
             grade = request.form.get('grade')
@@ -167,7 +188,7 @@ def dashboard():
                 
                 try:
                     conn.execute(
-                        'INSERT INTO access_codes (code, student_name, grade, subject, expires_at) VALUES (?, ?, ?, ?, ?)',
+                        'INSERT INTO access_codes (code, student_name, grade, subject, expires_at) VALUES (?, ?, *, ?)',
                         (code, student_name, grade, subject, expires_at)
                     )
                     generated_count += 1
@@ -175,11 +196,11 @@ def dashboard():
                     continue
                     
             conn.commit()
-            flash(f'تم توليد دفعة جديدة بنجاح: {generated_count} كود للطور ({grade} - {subject})!')
+            flash(f'تم توليد وحفظ دفعة أكواد بنجاح: {generated_count} كود للطور ({grade} - {subject})!')
             
         return redirect(url_for('dashboard'))
         
-    lessons = conn.execute('SELECT * FROM lessons').fetchall()
+    lessons = conn.execute('SELECT * FROM lessons ORDER BY id DESC').fetchall()
     codes = conn.execute('SELECT * FROM access_codes ORDER BY id DESC').fetchall()
     conn.close()
     
