@@ -9,8 +9,8 @@ import psycopg2.extras
 app = Flask(__name__)
 app.secret_key = 'dekiche_academy_secret_key_2026'
 
-# رابط قاعدة البيانات السحابية من Supabase (ضع رابطك هنا أو كمتبي بيئي في Render)
-DATABASE_URL = os.environ.get('DATABASE_URL', 'postgresql://postgres:YOUR_PASSWORD@db.xxxx.supabase.co:5432/postgres')
+# رابط قاعدة البيانات السحابية من Supabase (يقرأ من متغيرات البيئة في Render)
+DATABASE_URL = os.environ.get('DATABASE_URL', '')
 
 def get_db_connection():
     conn = psycopg2.connect(DATABASE_URL, cursor_factory=psycopg2.extras.RealDictCursor)
