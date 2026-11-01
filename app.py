@@ -70,7 +70,6 @@ def index():
             (grade, subject)
         ).fetchall()
     else:
-        # الأدمن يرى كل الدروس مقسمة ومرتبة
         lessons = conn.execute('SELECT * FROM lessons ORDER BY grade, subject, id DESC').fetchall()
         
     conn.close()
@@ -97,7 +96,6 @@ def login():
                 conn.close()
                 flash('عذراً، انتهت مدة صلاحية هذا الكود.')
             else:
-                # إذا لم يكن مسجلاً من قبل، نتحول لصفحة إدخال الاسم ورقم الهاتف
                 if code_data['is_registered'] == 0:
                     conn.close()
                     return render_template('complete_register.html', code=code)
