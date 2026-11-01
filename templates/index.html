@@ -3,87 +3,248 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>أكاديمية دقيش - برج بوعنامة</title>
+    <title>أكاديمية دقيش - منصة الدروس التعليمية</title>
+    <!-- خط تاجوال العربي الأصيل -->
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #0d6efd; --bg: #f4f7f6; --text: #2b2b2b; }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Tajawal', sans-serif; }
-        body { background-color: var(--bg); color: var(--text); }
-        
-        header { background: linear-gradient(135deg, #0d6efd, #0b5ed7); color: white; padding: 25px 20px; text-align: center; position: relative; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        .header-content { display: flex; flex-direction: column; align-items: center; gap: 10px; }
-        .logo-img { width: 100px; height: 100px; border-radius: 50%; background: white; padding: 3px; box-shadow: 0 3px 8px rgba(0,0,0,0.2); }
-        .header-actions { position: absolute; top: 20px; left: 20px; display: flex; gap: 10px; }
-        .btn-header { background: rgba(255,255,255,0.2); color: white; padding: 6px 14px; border-radius: 20px; text-decoration: none; font-weight: bold; font-size: 0.85rem; transition: 0.3s; }
-        .btn-header:hover { background: rgba(255,255,255,0.3); }
-        .logout-btn { background: #dc3545; }
-        
-        .container { max-width: 1000px; margin: 30px auto; padding: 0 20px; }
-        
-        .welcome-card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 25px; border-right: 5px solid var(--primary); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
-        .welcome-card h3 { color: var(--primary); font-size: 1.2rem; }
-        .student-info { background: #e7f1ff; color: #0a58ca; padding: 5px 12px; border-radius: 15px; font-weight: 500; font-size: 0.9rem; }
-        
-        .section-title { font-size: 1.4rem; font-weight: 700; margin-bottom: 15px; border-bottom: 3px solid var(--primary); display: inline-block; padding-bottom: 3px; }
-        .lessons-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
-        .lesson-card { background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 3px 10px rgba(0,0,0,0.05); border: 1px solid #eee; transition: 0.3s; }
-        .lesson-card:hover { transform: translateY(-3px); box-shadow: 0 6px 15px rgba(0,0,0,0.1); }
-        .lesson-header { background: #e7f1ff; padding: 12px 15px; border-bottom: 1px solid #d0e2ff; }
-        .lesson-header h4 { color: #0a58ca; }
-        .lesson-body { padding: 15px; color: #6c757d; font-size: 0.95rem; }
-        
-        .no-lessons { text-align: center; background: white; padding: 30px; border-radius: 10px; color: #6c757d; grid-column: 1 / -1; }
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --danger-color: #e74c3c;
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Tajawal', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        /* شريط التنصيب العلوي */
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .btn {
+            background-color: var(--accent-color);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: background 0.3s;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background-color: #2980b9;
+        }
+
+        .btn-danger {
+            background-color: var(--danger-color);
+        }
+        .btn-danger:hover {
+            background-color: #c0392b;
+        }
+
+        .btn-admin {
+            background-color: #e67e22;
+        }
+        .btn-admin:hover {
+            background-color: #d35400;
+        }
+
+        /* محتوى الصفحة الرئيسي */
+        .container {
+            max-width: 1100px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        /* لافتة الترحيب */
+        .welcome-banner {
+            background: linear-gradient(135deg, #3498db, #2c3e50);
+            color: white;
+            padding: 25px 30px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        .welcome-banner h2 {
+            font-size: 1.8rem;
+            margin-bottom: 8px;
+        }
+
+        .welcome-banner p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        /* شبكة عرض الدروس */
+        .lessons-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
+        }
+
+        .lesson-card {
+            background: var(--card-bg);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            border-top: 4px solid var(--accent-color);
+        }
+
+        .lesson-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+        }
+
+        .lesson-meta {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .badge {
+            background-color: #e8f4fc;
+            color: var(--accent-color);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .badge-subject {
+            background-color: #eafaf1;
+            color: var(--success-color);
+        }
+
+        .lesson-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 12px;
+        }
+
+        .lesson-desc {
+            color: #666;
+            font-size: 0.95rem;
+            margin-bottom: 20px;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .no-lessons {
+            grid-column: 1 / -1;
+            text-align: center;
+            background: white;
+            padding: 50px;
+            border-radius: 10px;
+            color: #777;
+            font-size: 1.2rem;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.03);
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #888;
+            font-size: 0.9rem;
+            margin-top: 50px;
+            border-top: 1px solid #ddd;
+        }
     </style>
 </head>
 <body>
 
+    <!-- الشريط العلوي -->
     <header>
+        <h1>أكاديمية دقيش 🎓</h1>
         <div class="header-actions">
-            <a href="{{ url_for('profile') }}" class="btn-header">الملف الشخصي</a>
-            <a href="{{ url_for('logout') }}" class="btn-header logout-btn">خروج</a>
-        </div>
-        <div class="header-content">
-            <img src="{{ url_for('static', filename='Logo.png') }}" alt="شعار الأكاديمية" class="logo-img">
-            <h1>أكاديمية دقيش - برج بوعنامة</h1>
-            <p>منصة التعليم الابتدائي المتخصصة</p>
+            {% if session.get('role') == 'admin' %}
+                <a href="{{ url_for('dashboard') }}" class="btn btn-admin">لوحة التحكم ⚙️</a>
+            {% endif %}
+            <a href="{{ url_for('logout') }}" class="btn btn-danger">تسجيل الخروج 🚪</a>
         </div>
     </header>
 
+    <!-- المحتوى الرئيسي -->
     <div class="container">
-        <div class="welcome-card">
-            <h3>أهلاً بك يا بطل: {{ session.get('student_name', 'مستخدم') }} 👋</h3>
+
+        <!-- لافتة الترحيب المخصصة -->
+        <div class="welcome-banner">
+            <h2>مرحباً بك، {{ session.get('student_name', 'أستاذنا الكريم') }} 🌟</h2>
             {% if session.get('role') == 'student' %}
-                <div class="student-info">
-                    {{ session.get('student_grade') }} | {{ session.get('student_subject') }}
-                </div>
+                <p>الطور الدراسي: <strong>{{ session.get('student_grade') }}</strong> | المادة: <strong>{{ session.get('student_subject') }}</strong></p>
             {% else %}
-                <div class="student-info">حساب المشرف العام</div>
+                <p>لوحة المشرف العام - استعراض كافة الدروس المنشورة في المنصة.</p>
             {% endif %}
         </div>
 
-        <h2 class="section-title">قائمة الدروس المتاحة</h2>
-
+        <!-- قائمة الدروس -->
         <div class="lessons-grid">
             {% if lessons %}
                 {% for lesson in lessons %}
-                    <a href="{{ url_for('lesson_detail', lesson_id=lesson.id) }}" style="text-decoration: none; color: inherit;">
-                        <div class="lesson-card">
-                            <div class="lesson-header">
-                                <h4>{{ lesson.title }}</h4>
+                    <div class="lesson-card">
+                        <div>
+                            <div class="lesson-meta">
+                                <span class="badge">{{ lesson.grade }}</span>
+                                <span class="badge badge-subject">{{ lesson.subject }}</span>
                             </div>
-                            <div class="lesson-body">
-                                <p>{{ lesson.description[:90] + '...' if lesson.description and lesson.description|length > 90 else (lesson.description or 'انقر لعرض تفاصيل الدرس.') }}</p>
-                            </div>
+                            <h3 class="lesson-title">{{ lesson.title }}</h3>
+                            <p class="lesson-desc">{{ lesson.description }}</p>
                         </div>
-                    </a>
+                        <a href="{{ url_for('lesson_detail', lesson_id=lesson.id) }}" class="btn" style="text-align: center;">مشاهدة الدرس 📺</a>
+                    </div>
                 {% endfor %}
             {% else %}
                 <div class="no-lessons">
-                    <p>📚 لا توجد دروس مضافة حالياً لهذا القسم.</p>
+                    <p>لا توجد دروس متاحة حالياً لهذا الطور والمادة. يرجى العودة لاحقاً!</p>
                 </div>
             {% endif %}
         </div>
+
     </div>
+
+    <footer>
+        جميع الحقوق محفوظة © الأستاذ عباد حمزة - أكاديمية دقيش 2026
+    </footer>
 
 </body>
 </html>
