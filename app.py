@@ -7,7 +7,6 @@ from flask import Flask, render_template, request, redirect, url_for, session, f
 app = Flask(__name__)
 app.secret_key = 'dekiche_academy_secret_key_2026'
 
-# إنشاء قاعدة البيانات والجداول وتعبئة دروس افتراضية لضمان عدم ضياعها أبدًا
 def init_db():
     conn = sqlite3.connect('academy.db')
     cursor = conn.cursor()
@@ -29,31 +28,12 @@ def init_db():
             student_name TEXT NOT NULL,
             grade TEXT NOT NULL,
             subject TEXT NOT NULL,
-            expires_at TEXT NOT NULL
+            expires_at TEXT NOT NULL,
+            phone TEXT,
+            is_registered INTEGER DEFAULT 0
         )
     ''')
     
-    # التحقق مما إذا كانت جدول الدروس فارغاً، لنقوم بإضافة دروس أساسية افتراضية لا تختفي أبدًا
-    cursor.execute('SELECT COUNT(*) FROM lessons')
-    if cursor.fetchone()[0] == 0:
-        default_lessons = [
-            ('مراجعة شاملة في قواعد اللغة العربية', 'السنة الخامسة ابتدائي', 'اللغة العربية', 'https://youtu.be/dQw4w9WgXcQ\nدروس الدعم الخاصة بالطور الابتدائي - الفصل الأول.'),
-            ('القسمة الإقليدية واللائحة العشرية', 'السنة الخامسة ابتدائي', 'الرياضيات', 'https://youtu.be/dQw4w9WgXcQ\nشرح مبسط لحل مسائل القسمة.'),
-            ('أركان الإيمان والإحسان', 'السنة الرابعة ابتدائي', 'التربية الإسلامية', 'https://youtu.be/dQw4w9WgXcQ\nدرس تربوي شامل للتلاميذ.')
-        ]
-        cursor.executemany(
-            'INSERT INTO lessons (title, grade, subject, description) VALUES (?, ?, ?, ?)',
-            default_lessons
-        )
-        
-    # إضافة كود تجريبي افتراضي للتلاميذ إن لم يوجد أي كود
-    cursor.execute('SELECT COUNT(*) FROM access_codes')
-    if cursor.fetchone()[0] == 0:
-        cursor.execute(
-            'INSERT INTO access_codes (code, student_name, grade, subject, expires_at) VALUES (?, ?, ?, ?, ?)',
-            ('DEMO55', 'تلميذ تجريبي', 'السنة الخامسة ابتدائي', 'اللغة العربية', (datetime.now() + timedelta(days=365)).strftime('%Y-%m-%d %H:%M:%S'))
-        )
-        
     conn.commit()
     conn.close()
 
@@ -64,19 +44,16 @@ def get_db_connection():
     conn.row_factory = sqlite3.Row
     return conn
 
-# دالة توليد الأكواد (أرقام وحروف إنجليزية كبيرة فقط)
 def generate_unique_code():
     conn = get_db_connection()
     while True:
         chars = string.ascii_uppercase + string.digits
         code = ''.join(random.choices(chars, k=6))
-        
         existing = conn.execute('SELECT id FROM access_codes WHERE code = ?', (code,)).fetchone()
         if not existing:
             conn.close()
             return code
 
-# الصفحة الرئيسية (تعرض دروس التلميذ الخاص بها حصرياً، أو كل الدروس للأدمن)
 @app.route('/')
 def index():
     if 'role' not in session:
@@ -88,19 +65,17 @@ def index():
     if role == 'student':
         grade = session.get('student_grade', '')
         subject = session.get('student_subject', '')
-        # جلب الدروس التي تطابق تماماً طور ومادة التلميذ فقط
         lessons = conn.execute(
-            'SELECT * FROM lessons WHERE grade = ? AND subject = ?', 
+            'SELECT * FROM lessons WHERE grade = ? AND subject = ? ORDER BY id DESC', 
             (grade, subject)
         ).fetchall()
     else:
-        # الأدمن يرى كل الدروس التي رفعها
-        lessons = conn.execute('SELECT * FROM lessons').fetchall()
+        # الأدمن يرى كل الدروس مقسمة ومرتبة
+        lessons = conn.execute('SELECT * FROM lessons ORDER BY grade, subject, id DESC').fetchall()
         
     conn.close()
     return render_template('index.html', lessons=lessons)
 
-# صفحة تسجيل الدخول
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -115,24 +90,57 @@ def login():
         code_data = conn.execute(
             'SELECT * FROM access_codes WHERE code = ?', (code,)
         ).fetchone()
-        conn.close()
         
         if code_data:
             expires_at = datetime.strptime(code_data['expires_at'], '%Y-%m-%d %H:%M:%S')
             if datetime.now() > expires_at:
+                conn.close()
                 flash('عذراً، انتهت مدة صلاحية هذا الكود.')
             else:
-                session['role'] = 'student'
-                session['student_name'] = code_data['student_name']
-                session['student_grade'] = code_data['grade']
-                session['student_subject'] = code_data['subject']
-                return redirect(url_for('index'))
+                # إذا لم يكن مسجلاً من قبل، نتحول لصفحة إدخال الاسم ورقم الهاتف
+                if code_data['is_registered'] == 0:
+                    conn.close()
+                    return render_template('complete_register.html', code=code)
+                else:
+                    session['role'] = 'student'
+                    session['student_name'] = code_data['student_name']
+                    session['student_grade'] = code_data['grade']
+                    session['student_subject'] = code_data['subject']
+                    conn.close()
+                    return redirect(url_for('index'))
         else:
+            conn.close()
             flash('رمز الدخول غير صحيح، يرجى التأكد وإعادة المحاولة.')
             
     return render_template('student_login.html')
 
-# صفحة تفاصيل الدرس
+@app.route('/complete_register', methods=['POST'])
+def complete_register():
+    code = request.form.get('code')
+    full_name = request.form.get('full_name', '').strip()
+    phone = request.form.get('phone', '').strip()
+    
+    if not full_name or not phone:
+        flash('يرجى إدخال الاسم واللقب ورقم الهاتف.')
+        return render_template('complete_register.html', code=code)
+        
+    conn = get_db_connection()
+    conn.execute(
+        'UPDATE access_codes SET student_name = ?, phone = ?, is_registered = 1 WHERE code = ?',
+        (full_name, phone, code)
+    )
+    conn.commit()
+    
+    code_data = conn.execute('SELECT * FROM access_codes WHERE code = ?', (code,)).fetchone()
+    conn.close()
+    
+    session['role'] = 'student'
+    session['student_name'] = code_data['student_name']
+    session['student_grade'] = code_data['grade']
+    session['student_subject'] = code_data['subject']
+    
+    return redirect(url_for('index'))
+
 @app.route('/lesson/<int:lesson_id>')
 def lesson_detail(lesson_id):
     if 'role' not in session:
@@ -148,7 +156,6 @@ def lesson_detail(lesson_id):
         
     return render_template('lesson.html', lesson=lesson)
 
-# لوحة تحكم المشرف
 @app.route('/dashboard', methods=['GET', 'POST'])
 def dashboard():
     if session.get('role') != 'admin':
@@ -173,8 +180,13 @@ def dashboard():
             conn.commit()
             flash('تم إضافة الدرس وحفظه بنجاح!')
             
+        elif action == 'delete_lesson':
+            lesson_id = request.form.get('lesson_id')
+            conn.execute('DELETE FROM lessons WHERE id = ?', (lesson_id,))
+            conn.commit()
+            flash('تم حذف الدرس بنجاح.')
+            
         elif action == 'generate_code':
-            student_prefix = request.form.get('student_prefix', 'تلميذ')
             grade = request.form.get('grade')
             subject = request.form.get('subject')
             duration_days = int(request.form.get('duration_days', 30))
@@ -184,33 +196,26 @@ def dashboard():
             for i in range(count):
                 code = generate_unique_code()
                 expires_at = (datetime.now() + timedelta(days=duration_days)).strftime('%Y-%m-%d %H:%M:%S')
-                student_name = f"{student_prefix} {i+1}"
                 
                 try:
                     conn.execute(
-                        'INSERT INTO access_codes (code, student_name, grade, subject, expires_at) VALUES (?, ?, *, ?)',
-                        (code, student_name, grade, subject, expires_at)
+                        'INSERT INTO access_codes (code, student_name, grade, subject, expires_at, is_registered) VALUES (?, ?, ?, ?, ?, 0)',
+                        (code, f"تلميذ جديد {i+1}", grade, subject, expires_at)
                     )
                     generated_count += 1
                 except sqlite3.IntegrityError:
                     continue
                     
             conn.commit()
-            flash(f'تم توليد وحفظ دفعة أكواد بنجاح: {generated_count} كود للطور ({grade} - {subject})!')
+            flash(f'تم توليد {generated_count} كود بنجاح للطور ({grade} - {subject})!')
             
         return redirect(url_for('dashboard'))
         
-    lessons = conn.execute('SELECT * FROM lessons ORDER BY id DESC').fetchall()
+    lessons = conn.execute('SELECT * FROM lessons ORDER BY grade, subject, id DESC').fetchall()
     codes = conn.execute('SELECT * FROM access_codes ORDER BY id DESC').fetchall()
     conn.close()
     
     return render_template('dashboard.html', lessons=lessons, codes=codes)
-
-@app.route('/profile')
-def profile():
-    if 'role' not in session:
-        return redirect(url_for('login'))
-    return render_template('profile.html')
 
 @app.route('/logout')
 def logout():
