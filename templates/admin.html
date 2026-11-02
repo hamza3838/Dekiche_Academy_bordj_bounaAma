@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم - الأستاذ حمزة</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Cairo', sans-serif; background: #f8f9fa; margin: 0; padding: 20px; }
+        .container { max-width: 900px; margin: auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        h1, h2 { color: #1a73e8; }
+        .section { margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid #eee; }
+        form { display: grid; gap: 12px; }
+        input, select { padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-family: 'Cairo', sans-serif; }
+        button { padding: 10px; background: #1a73e8; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
+        button:hover { background: #1557b0; }
+        .logout { float: left; background: #d93025; padding: 5px 15px; text-decoration: none; color: white; border-radius: 4px; font-size: 14px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: center; font-size: 14px; }
+        th { background: #f1f3f4; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/logout" class="logout">تسجيل الخروج</a>
+        <h1>لوحة تحكم الأستاذ حمزة</h1>
+
+        <!-- إضافة درس جديد -->
+        <div class="section">
+            <h2>إضافة درس جديد</h2>
+            <form method="POST" action="/admin/add_lesson">
+                <input type="text" name="title" placeholder="عنوان الدرس" required>
+                <input type="text" name="youtube_url" placeholder="رابط يوتيوب (Embed)" required>
+                <select name="lesson_month">
+                    <option value="1">الشهر الأول</option>
+                    <option value="2">الشهر الثاني</option>
+                    <option value="3">الشهر الثالث</option>
+                    <option value="4">الشهر الرابع</option>
+                    <option value="5">الشهر الخامس</option>
+                    <option value="6">الشهر السادس</option>
+                    <option value="7">الشهر السابع</option>
+                    <option value="8">الشهر الثامن</option>
+                    <option value="9">الشهر التاسع</option>
+                </select>
+                <input type="number" name="order_index" placeholder="رتبة الدرس (مثلاً 1, 2, 3...)" value="0">
+                <button type="submit">إضافة الدرس</button>
+            </form>
+        </div>
+
+        <!-- توليد كود تفعيل -->
+        <div class="section">
+            <h2>توليد أكواد التفعيل الشهرية</h2>
+            <form method="POST" action="/admin/generate_code">
+                <input type="text" name="code" placeholder="أدخل كود التفعيل (مثلاً HAMZA-M1-123)" required>
+                <select name="code_month">
+                    <option value="1">مخصص للشهر الأول</option>
+                    <option value="2">مخصص للشهر الثاني</option>
+                    <option value="3">مخصص للشهر الثالث</option>
+                    <option value="4">مخصص للشهر الرابع</option>
+                    <option value="5">مخصص للشهر الخامس</option>
+                    <option value="6">مخصص للشهر السادس</option>
+                    <option value="7">مخصص للشهر السابع</option>
+                    <option value="8">مخصص للشهر الثامن</option>
+                    <option value="9">مخصص للشهر التاسع</option>
+                </select>
+                <button type="submit" style="background: #34a853;">إنشاء الكود</button>
+            </form>
+        </div>
+
+        <!-- قائمة التلاميذ المسجلين -->
+        <div>
+            <h2>التلاميذ المسجلون</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>اسم التلميذ</th>
+                        <th>رقم الهاتف</th>
+                        <th>الشهر المفتوح</th>
+                        <th>تاريخ التسجيل</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student in students %}
+                    <tr>
+                        <td>{{ student.name }}</td>
+                        <td>{{ student.phone }}</td>
+                        <td>الشهر {{ student.month }}</td>
+                        <td>{{ student.created_at }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>
