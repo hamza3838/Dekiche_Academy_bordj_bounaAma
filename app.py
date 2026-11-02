@@ -23,17 +23,24 @@ def generate_random_codes(count=10, prefix="HAMZA"):
         codes.append(f"{prefix}-{suffix}")
     return codes
 
+# الصفحة الرئيسية (توجيه لصفحة دخول الأستاذ أو يمكن تخصيصها)
+@app.route('/')
+def home():
+    return redirect(url_for('admin_login'))
+
+# مسار تسجيل دخول الأستاذ
 @app.route('/admin', methods=['GET', 'POST'])
 def admin_login():
     if request.method == 'POST':
         password = request.form.get('password')
-        if password == 'hamza123':  # يمكنك تغيير كلمة المرور هنا إن أردت
+        if password == 'hamza123':  # يمكنك تغيير كلمة المرور هنا
             session['is_admin'] = True
             return redirect(url_for('admin_dashboard'))
         else:
             flash('كلمة المرور غير صحيحة!', 'danger')
     return render_template('admin_login.html')
 
+# لوحة تحكم الأستاذ
 @app.route('/admin/dashboard')
 def admin_dashboard():
     if not session.get('is_admin'):
@@ -42,7 +49,7 @@ def admin_dashboard():
     conn = get_db_connection()
     cur = conn.cursor()
     
-    # جلب جميع الدروس مرتبطة ومترتبة حسب السنة والمادة
+    # جلب جميع الدروس مرتبة حسب السنة والمادة والشهر والترتيب
     cur.execute("SELECT * FROM lessons ORDER BY grade, subject, lesson_month, order_index")
     lessons = cur.fetchall()
     
@@ -50,7 +57,7 @@ def admin_dashboard():
     cur.execute("SELECT * FROM access_codes WHERE student_name IS NOT NULL ORDER BY created_at DESC")
     students = cur.fetchall()
     
-    # جلب آخر الأكواد غير المستخدمة أو المولدة حديثاً لتمكين طباعتها ونسخها
+    # جلب آخر الأكواد المولدة لتمكين طباعتها ونسخها
     cur.execute("SELECT code FROM access_codes WHERE is_used = FALSE ORDER BY id DESC LIMIT 50")
     recent_codes = [row['code'] for row in cur.fetchall()]
     
@@ -59,6 +66,7 @@ def admin_dashboard():
     
     return render_template('admin.html', lessons=lessons, students=students, recent_codes=recent_codes)
 
+# إضافة درس جديد مع السنة والمادة
 @app.route('/admin/add_lesson', methods=['POST'])
 def add_lesson():
     if not session.get('is_admin'):
@@ -66,8 +74,8 @@ def add_lesson():
     
     title = request.form['title']
     youtube_url = request.form['youtube_url']
-    grade = request.form['grade']       # السنة الدراسية (مثلاً: الخامسة ابتدائي)
-    subject = request.form['subject']   # المادة (مثلاً: رياضيات)
+    grade = request.form['grade']       # السنة الدراسية
+    subject = request.form['subject']   # المادة
     lesson_month = int(request.form['lesson_month'])
     order_index = int(request.form.get('order_index', 0))
     
@@ -84,6 +92,7 @@ def add_lesson():
     flash("تمت إضافة الدرس بنجاح!", "success")
     return redirect(url_for('admin_dashboard'))
 
+# توليد دفعة أكواد عشوائية
 @app.route('/admin/generate_batch_codes', methods=['POST'])
 def generate_batch_codes():
     if not session.get('is_admin'):
@@ -108,6 +117,26 @@ def generate_batch_codes():
     flash(f"تم توليد {count} كود بنجاح للشهر {code_month}!", "success")
     return redirect(url_for('admin_dashboard'))
 
+# فضاء التلميذ (عرض الدروس حسب شهر الكود الخاص به)
+@app.route('/student')
+def student_space():
+    if not session.get('student_logged_in'):
+        return redirect(url_for('home')) # أو مسار تسجيل دخول التلميذ
+        
+    student_month = session.get('student_month', 1)
+    student_name = session.get('student_name', 'تلميذ')
+    
+    conn = get_db_connection()
+    cur = conn.cursor()
+    # جلب الدروس المطابقة لشهر التلميذ فقط
+    cur.execute("SELECT * FROM lessons WHERE lesson_month = %s ORDER BY grade, subject, order_index", (student_month,))
+    lessons = cur.fetchall()
+    cur.close()
+    conn.close()
+    
+    return render_template('student.html', lessons=lessons, student_name=student_name)
+
+# تسجيل الخروج العام
 @app.route('/logout')
 def logout():
     session.clear()
