@@ -6,9 +6,8 @@ import psycopg2
 import psycopg2.extras
 
 app = Flask(__name__)
-app.secret_key = 'your_secret_key_here'
+app.secret_key = 'hamza_secret_key_academy'
 
-# الاتصال بقاعدة البيانات (Supabase PostgreSQL)
 def get_db_connection():
     conn = psycopg2.connect(
         os.environ.get("DATABASE_URL"),
@@ -16,7 +15,7 @@ def get_db_connection():
     )
     return conn
 
-# توليد أكواد عشوائية دفعة واحدة
+# دالة توليد أكواد عشوائية
 def generate_random_codes(count=10, prefix="HAMZA"):
     codes = []
     for _ in range(count):
@@ -24,15 +23,26 @@ def generate_random_codes(count=10, prefix="HAMZA"):
         codes.append(f"{prefix}-{suffix}")
     return codes
 
-@app.route('/admin', methods=['GET'])
+@app.route('/admin', methods=['GET', 'POST'])
+def admin_login():
+    if request.method == 'POST':
+        password = request.form.get('password')
+        if password == 'hamza123':  # يمكنك تغيير كلمة المرور هنا إن أردت
+            session['is_admin'] = True
+            return redirect(url_for('admin_dashboard'))
+        else:
+            flash('كلمة المرور غير صحيحة!', 'danger')
+    return render_template('admin_login.html')
+
+@app.route('/admin/dashboard')
 def admin_dashboard():
     if not session.get('is_admin'):
-        return redirect(url_for('login'))
+        return redirect(url_for('admin_login'))
     
     conn = get_db_connection()
     cur = conn.cursor()
     
-    # جلب جميع الدروس منظمة
+    # جلب جميع الدروس مرتبطة ومترتبة حسب السنة والمادة
     cur.execute("SELECT * FROM lessons ORDER BY grade, subject, lesson_month, order_index")
     lessons = cur.fetchall()
     
@@ -40,20 +50,24 @@ def admin_dashboard():
     cur.execute("SELECT * FROM access_codes WHERE student_name IS NOT NULL ORDER BY created_at DESC")
     students = cur.fetchall()
     
+    # جلب آخر الأكواد غير المستخدمة أو المولدة حديثاً لتمكين طباعتها ونسخها
+    cur.execute("SELECT code FROM access_codes WHERE is_used = FALSE ORDER BY id DESC LIMIT 50")
+    recent_codes = [row['code'] for row in cur.fetchall()]
+    
     cur.close()
     conn.close()
     
-    return render_template('admin.html', lessons=lessons, students=students)
+    return render_template('admin.html', lessons=lessons, students=students, recent_codes=recent_codes)
 
 @app.route('/admin/add_lesson', methods=['POST'])
 def add_lesson():
     if not session.get('is_admin'):
-        return redirect(url_for('login'))
+        return redirect(url_for('admin_login'))
     
     title = request.form['title']
     youtube_url = request.form['youtube_url']
     grade = request.form['grade']       # السنة الدراسية (مثلاً: الخامسة ابتدائي)
-    subject = request.form['subject']   # المادة (مثلاً: لغة عربية، رياضيات)
+    subject = request.form['subject']   # المادة (مثلاً: رياضيات)
     lesson_month = int(request.form['lesson_month'])
     order_index = int(request.form.get('order_index', 0))
     
@@ -67,13 +81,13 @@ def add_lesson():
     cur.close()
     conn.close()
     
-    flash("تم إضافة الدرس بنجاح!", "success")
+    flash("تمت إضافة الدرس بنجاح!", "success")
     return redirect(url_for('admin_dashboard'))
 
 @app.route('/admin/generate_batch_codes', methods=['POST'])
 def generate_batch_codes():
     if not session.get('is_admin'):
-        return redirect(url_for('login'))
+        return redirect(url_for('admin_login'))
     
     code_month = int(request.form['code_month'])
     count = int(request.form['count'])
@@ -94,4 +108,10 @@ def generate_batch_codes():
     flash(f"تم توليد {count} كود بنجاح للشهر {code_month}!", "success")
     return redirect(url_for('admin_dashboard'))
 
-# ... بقية المسارات الخاصة بتسجيل الدخول وفضاء التلميذ ...
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('admin_login'))
+
+if __name__ == '__main__':
+    app.run(debug=True)
