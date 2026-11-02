@@ -1,58 +1,134 @@
-<!-- نموذج إضافة درس مع تحديد السنة والمادة -->
-<div class="section">
-    <h2>إضافة درس جديد</h2>
-    <form method="POST" action="/admin/add_lesson">
-        <input type="text" name="title" placeholder="عنوان الدرس" required>
-        <input type="text" name="youtube_url" placeholder="رابط يوتيوب (Embed)" required>
-        <input type="text" name="grade" placeholder="السنة الدراسية (مثلاً: الخامسة ابتدائي)" required>
-        <input type="text" name="subject" placeholder="المادة (مثلاً: رياضيات / لغة عربية)" required>
-        <select name="lesson_month">
-            <option value="1">الشهر الأول</option>
-            <option value="2">الشهر الثاني</option>
-            <!-- باقي الشهور -->
-        </select>
-        <input type="number" name="order_index" placeholder="رتبة الدرس" value="0">
-        <button type="submit">إضافة الدرس</button>
-    </form>
-</div>
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم - الأستاذ حمزة</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Cairo', sans-serif; background: #f8f9fa; margin: 0; padding: 20px; }
+        .container { max-width: 950px; margin: auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        h1, h2 { color: #1a73e8; }
+        .section { margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid #eee; }
+        form { display: grid; gap: 12px; }
+        input, select { padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-family: 'Cairo', sans-serif; }
+        button { padding: 10px; background: #1a73e8; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
+        button:hover { background: #1557b0; }
+        .logout { float: left; background: #d93025; padding: 5px 15px; text-decoration: none; color: white; border-radius: 4px; font-size: 14px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: center; font-size: 14px; }
+        th { background: #f1f3f4; }
+        .codes-box { background: #e8f0fe; padding: 15px; border-radius: 6px; margin-top: 10px; max-height: 150px; overflow-y: auto; font-family: monospace; font-size: 16px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/logout" class="logout">تسجيل الخروج</a>
+        <h1>لوحة تحكم الأستاذ حمزة</h1>
 
-<!-- نموذج توليد أكواد عشوائية دفعة واحدة -->
-<div class="section">
-    <h2>توليد دفعة أكواد تفعيل عشوائية</h2>
-    <form method="POST" action="/admin/generate_batch_codes">
-        <select name="code_month">
-            <option value="1">الشهر الأول</option>
-            <option value="2">الشهر الثاني</option>
-            <!-- باقي الشهور -->
-        </select>
-        <input type="number" name="count" placeholder="عدد الأكواد المطلوبة (مثلاً 20)" value="10" required>
-        <button type="submit" style="background: #34a853;">توليد الأكواد دفعة واحدة</button>
-    </form>
-</div>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div style="background: #d4edda; color: #155724; padding: 10px; border-radius: 5px; margin-bottom: 15px;">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
 
-<!-- عرض جميع الدروس مرتبطة حسب السنة والمادة -->
-<div class="section">
-    <h2>جميع الدروس المسجلة (حسب السنة والمادة)</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>السنة الدراسية</th>
-                <th>المادة</th>
-                <th>الشهر</th>
-                <th>عنوان الدرس</th>
-                <th>الترتيب</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for lesson in lessons %}
-            <tr>
-                <td>{{ lesson.grade }}</td>
-                <td>{{ lesson.subject }}</td>
-                <td>الشهر {{ lesson.lesson_month }}</td>
-                <td>{{ lesson.title }}</td>
-                <td>{{ lesson.order_index }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
+        <!-- إضافة درس جديد مع السنة والمادة -->
+        <div class="section">
+            <h2>إضافة درس جديد</h2>
+            <form method="POST" action="/admin/add_lesson">
+                <input type="text" name="title" placeholder="عنوان الدرس" required>
+                <input type="text" name="youtube_url" placeholder="رابط يوتيوب (Embed)" required>
+                <input type="text" name="grade" placeholder="السنة الدراسية (مثلاً: الخامسة ابتدائي)" required>
+                <input type="text" name="subject" placeholder="المادة (مثلاً: الرياضيات / اللغة العربية)" required>
+                <select name="lesson_month">
+                    <option value="1">الشهر الأول</option>
+                    <option value="2">الشهر الثاني</option>
+                    <option value="3">الشهر الثالث</option>
+                    <option value="4">الشهر الرابع</option>
+                    <option value="5">الشهر الخامس</option>
+                    <option value="6">الشهر السادس</option>
+                    <option value="7">الشهر السابع</option>
+                    <option value="8">الشهر الثامن</option>
+                    <option value="9">الشهر التاسع</option>
+                </select>
+                <input type="number" name="order_index" placeholder="رتبة الدرس (مثلاً 1, 2, 3...)" value="0">
+                <button type="submit">إضافة الدرس</button>
+            </form>
+        </div>
+
+        <!-- توليد أكواد عشوائية دفعة واحدة للطباعة -->
+        <div class="section">
+            <h2>توليد دفعة أكواد تفعيل عشوائية</h2>
+            <form method="POST" action="/admin/generate_batch_codes">
+                <select name="code_month">
+                    <option value="1">الشهر الأول</option>
+                    <option value="2">الشهر الثاني</option>
+                    <option value="3">الشهر الثالث</option>
+                    <option value="4">الشهر الرابع</option>
+                    <option value="5">الشهر الخامس</option>
+                    <option value="6">الشهر السادس</option>
+                    <option value="7">الشهر السابع</option>
+                    <option value="8">الشهر الثامن</option>
+                    <option value="9">الشهر التاسع</option>
+                </select>
+                <input type="number" name="count" placeholder="عدد الأكواد المطلوبة (مثلاً 20)" value="10" required>
+                <button type="submit" style="background: #34a853;">توليد الأكواد دفعة واحدة</button>
+            </form>
+
+            {% if recent_codes %}
+            <div style="margin-top: 15px;">
+                <h3>الأكواد الجاهزة للنسخ والطباعة:</h3>
+                <button onclick="copyCodes()" style="background: #f9ab00; color: #000; margin-bottom: 10px;">نسخ جميع الأكواد</button>
+                <div class="codes-box" id="codesList">
+                    {% for c in recent_codes %}
+                        <div>{{ c }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- عرض جميع الدروس مرتبطة حسب السنة والمادة -->
+        <div class="section">
+            <h2>جميع الدروس المسجلة (منظمة حسب السنة والمادة)</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>السنة الدراسية</th>
+                        <th>المادة</th>
+                        <th>الشهر</th>
+                        <th>عنوان الدرس</th>
+                        <th>الترتيب</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for lesson in lessons %}
+                    <tr>
+                        <td>{{ lesson.grade }}</td>
+                        <td>{{ lesson.subject }}</td>
+                        <td>الشهر {{ lesson.lesson_month }}</td>
+                        <td>{{ lesson.title }}</td>
+                        <td>{{ lesson.order_index }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        function copyCodes() {
+            const codesDiv = document.getElementById('codesList');
+            let text = "";
+            codesDiv.querySelectorAll('div').forEach(el => {
+                text += el.innerText + "\n";
+            });
+            navigator.clipboard.writeText(text).then(() => {
+                alert('تم نسخ جميع الأكواد بنجاح، يمكنك لصقها وطباعتها مباشرة!');
+            });
+        }
+    </script>
+</body>
+</html>
