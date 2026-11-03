@@ -1,190 +1,160 @@
-import sqlite3
-from datetime import datetime
 from flask import Flask, render_template, request, redirect, url_for, session, flash
+from supabase import create_client, Client
+import os
 
 app = Flask(__name__)
-app.secret_key = 'dekiche_academy_secret_key_2026'
+app.secret_key = os.environ.get("SECRET_KEY", "dar_daqiche_secret_key_2026")
 
-# إنشاء قاعدة البيانات والجداول تلقائياً
-def init_db():
-    conn = sqlite3.connect('academy.db')
-    cursor = conn.cursor()
-    
-    # جدول الدروس
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS lessons (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            title TEXT NOT NULL,
-            grade TEXT NOT NULL,
-            subject TEXT NOT NULL,
-            description TEXT
-        )
-    ''')
-    
-    # جدول الأكواد والمستخدمين
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS access_codes (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            code TEXT UNIQUE NOT NULL,
-            student_name TEXT NOT NULL,
-            grade TEXT NOT NULL,
-            subject TEXT NOT NULL,
-            expires_at TEXT NOT NULL
-        )
-    ''')
-    
-    # كود تجريبي ينشأ تلقائياً عند التشغيل الأول
-    cursor.execute('''
-        INSERT OR IGNORE INTO access_codes (code, student_name, grade, subject, expires_at)
-        VALUES (?, ?, ?, ?, ?)
-    ''', ('12345', 'حمزة عباد', 'السنة الخامسة ابتدائي', 'اللغة العربية', '2026-12-31 23:59:59'))
-    
-    conn.commit()
-    conn.close()
+# إعداد اتصال Supabase
+SUPABASE_URL = os.environ.get("SUPABASE_URL", "YOUR_SUPABASE_URL")
+SUPABASE_KEY = os.environ.get("SUPABASE_KEY", "YOUR_SUPABASE_KEY")
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-init_db()
+# كلمات المرور
+ADMIN_PASSWORD = "admin_secure_2026"
+TEACHER_PASSWORD = "teacher_password_2026"
 
-def get_db_connection():
-    conn = sqlite3.connect('academy.db')
-    conn.row_factory = sqlite3.Row
-    return conn
-
-# الصفحة الرئيسية للتلميذ (عرض دروسه المخصصة)
 @app.route('/')
-def index():
-    if 'role' not in session:
-        return redirect(url_for('login'))
-        
-    role = session.get('role', 'student')
-    conn = get_db_connection()
-    
-    if role == 'student':
-        grade = session.get('student_grade', '')
-        subject = session.get('student_subject', '')
-        lessons = conn.execute(
-            'SELECT * FROM lessons WHERE grade = ? AND subject = ?', 
-            (grade, subject)
-        ).fetchall()
-    else:
-        lessons = conn.execute('SELECT * FROM lessons').fetchall()
-        
-    conn.close()
-    return render_template('index.html', lessons=lessons)
+def home():
+    return render_template('index.html')
 
-# صفحة تسجيل دخول التلامذة
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        code = request.form.get('code', '').strip()
-        
-        # دخول المشرف العام
-        if code == 'admin123':
-            session['role'] = 'admin'
-            session['student_name'] = 'المشرف العام'
-            return redirect(url_for('dashboard'))
-            
-        # التحقق من كود التلميذ
-        conn = get_db_connection()
-        code_data = conn.execute(
-            'SELECT * FROM access_codes WHERE code = ?', (code,)
-        ).fetchone()
-        conn.close()
-        
-        if code_data:
-            expires_at = datetime.strptime(code_data['expires_at'], '%Y-%m-%d %H:%M:%S')
-            if datetime.now() > expires_at:
-                flash('عذراً، انتهت مدة صلاحية هذا الكود.')
-            else:
-                session['role'] = 'student'
-                session['student_name'] = code_data['student_name']
-                session['student_grade'] = code_data['grade']
-                session['student_subject'] = code_data['subject']
-                return redirect(url_for('index'))
+# --- بوابة التلميذ (إدخال الكود أو الدخول بالاسم والهاتف) ---
+@app.route('/student-login', methods=['POST'])
+def student_login():
+    action = request.form.get('action')
+    full_name = request.form.get('full_name')
+    phone = request.form.get('phone')
+
+    if action == 'login':
+        # التحقق من وجود التلميذ في جدول الأكواد المستعملة
+        res = supabase.table('access_codes').select('*').eq('phone', phone).eq('student_name', full_name).execute()
+        if res.data:
+            session['student_name'] = full_name
+            session['phone'] = phone
+            return redirect(url_for('student_dashboard'))
         else:
-            flash('رمز الدخول غير صحيح، يرجى التأكد وإعادة المحاولة.')
-            
-    return render_template('student_login.html')
+            flash("البيانات غير صحيحة أو لم تقم بتفعيل كود من قبل.", "danger")
+            return redirect(url_for('home'))
 
-# صفحة عرض تفاصيل الدرس الواحد
-@app.route('/lesson/<int:lesson_id>')
-def lesson_detail(lesson_id):
-    if 'role' not in session:
-        return redirect(url_for('login'))
+    elif action == 'redeem':
+        code_text = request.form.get('code')
+        # البحث عن الكود في قاعدة البيانات والتأكد أنه غير مستعمل
+        code_res = supabase.table('access_codes').select('*').eq('code', code_text).eq('is_used', False).execute()
         
-    conn = get_db_connection()
-    lesson = conn.execute('SELECT * FROM lessons WHERE id = ?', (lesson_id,)).fetchone()
-    conn.close()
-    
-    if not lesson:
-        flash('عذراً، هذا الدرس غير موجود.')
-        return redirect(url_for('index'))
+        if not code_res.data:
+            flash("الكود غير صالح أو تم استخدامه مسبقاً!", "danger")
+            return redirect(url_for('home'))
         
-    return render_template('lesson.html', lesson=lesson)
+        code_data = code_res.data[0]
 
-# لوحة تحكم المشرف
-@app.route('/dashboard', methods=['GET', 'POST'])
-def dashboard():
-    if session.get('role') != 'admin':
-        flash('عذراً، هذه الصفحة خاصة بالمشرف فقط.')
-        return redirect(url_for('login'))
-        
-    conn = get_db_connection()
+        # تحديث الكود ليرتبط بالتلميذ ويصبح مستخدماً
+        supabase.table('access_codes').update({
+            'student_name': full_name,
+            'phone': phone,
+            'is_used': True
+        }).eq('id', code_data['id']).execute()
+
+        session['student_name'] = full_name
+        session['phone'] = phone
+        flash("تم تفعيل اشتراكك بنجاح!", "success")
+        return redirect(url_for('student_dashboard'))
+
+# --- لوحة تحكم التلميذ ---
+@app.route('/student-dashboard')
+def student_dashboard():
+    if 'student_name' not in session:
+        return redirect(url_for('home'))
+
+    student_name = session['student_name']
     
+    # جلب جميع اشتراكات وپاقات التلميذ الفعالة
+    subs_res = supabase.table('access_codes').select('*').eq('student_name', student_name).execute()
+    subscriptions = subs_res.data
+
+    # جلب الدروس المطابقة للمواد والسنوات التي اشتراها التلميذ
+    lessons = []
+    if subscriptions:
+        for sub in subscriptions:
+            l_res = supabase.table('lessons').select('*').eq('school_year', sub.get('grade')).eq('subject', sub.get('subject')).eq('month', sub.get('month')).execute()
+            lessons.extend(l_res.data)
+
+    return render_template('student_dashboard.html', student_name=student_name, subscriptions=subscriptions, lessons=lessons)
+
+# --- بوابة الأستاذ ---
+@app.route('/teacher-login', methods=['GET', 'POST'])
+def teacher_login():
     if request.method == 'POST':
-        action = request.form.get('action')
-        
-        # إضافة درس جديد
-        if action == 'add_lesson':
-            title = request.form.get('title')
-            grade = request.form.get('grade')
-            subject = request.form.get('subject')
-            description = request.form.get('description')
-            
-            conn.execute(
-                'INSERT INTO lessons (title, grade, subject, description) VALUES (?, ?, ?, ?)',
-                (title, grade, subject, description)
-            )
-            conn.commit()
-            flash('تم إضافة الدرس بنجاح!')
-            
-        # إضافة كود تلميذ جديد
-        elif action == 'add_code':
-            code = request.form.get('code')
-            student_name = request.form.get('student_name')
-            grade = request.form.get('grade')
-            subject = request.form.get('subject')
-            expires_at = request.form.get('expires_at')
-            
-            try:
-                conn.execute(
-                    'INSERT INTO access_codes (code, student_name, grade, subject, expires_at) VALUES (?, ?, ?, ?, ?)',
-                    (code, student_name, grade, subject, expires_at)
-                )
-                conn.commit()
-                flash('تم إنشاء كود التلميذ بنجاح!')
-            except sqlite3.IntegrityError:
-                flash('هذا الكود موجود مسبقاً، يرجى اختيار رمز آخر.')
-                
-        return redirect(url_for('dashboard'))
-        
-    lessons = conn.execute('SELECT * FROM lessons').fetchall()
-    codes = conn.execute('SELECT * FROM access_codes').fetchall()
-    conn.close()
-    
-    return render_template('dashboard.html', lessons=lessons, codes=codes)
+        if request.form.get('password') == TEACHER_PASSWORD:
+            session['is_teacher'] = True
+            return redirect(url_for('teacher_dashboard'))
+        flash("كلمة مرور الأستاذ غير صحيحة", "danger")
+    return render_template('teacher_login.html')
 
-# صفحة الملف الشخصي
-@app.route('/profile')
-def profile():
-    if 'role' not in session:
-        return redirect(url_for('login'))
-    return render_template('profile.html')
+@app.route('/teacher-dashboard', methods=['GET', 'POST'])
+def teacher_dashboard():
+    if not session.get('is_teacher'):
+        return redirect(url_for('teacher_login'))
 
-# تسجيل الخروج
+    if request.method == 'POST':
+        school_year = request.form.get('school_year')
+        subject = request.form.get('subject')
+        month = request.form.get('month')
+        week = request.form.get('week')
+        title = request.form.get('title')
+        video_url = request.form.get('video_url')
+        pdf_url = request.form.get('pdf_url')
+
+        supabase.table('lessons').insert({
+            'school_year': school_year,
+            'subject': subject,
+            'month': month,
+            'week': week,
+            'title': title,
+            'video_url': video_url,
+            'pdf_url': pdf_url
+        }).execute()
+        flash("تم إضافة الدرس بنجاح!", "success")
+
+    lessons_res = supabase.table('lessons').select('*').order('created_at', desc=True).execute()
+    return render_template('teacher_dashboard.html', lessons=lessons_res.data)
+
+# --- لوحة المشرف لتوليد الأكواد ---
+@app.route('/admin-secret-panel-daqiche', methods=['GET', 'POST'])
+def admin_panel():
+    if request.method == 'POST' and 'password' in request.form:
+        if request.form.get('password') == ADMIN_PASSWORD:
+            session['is_admin'] = True
+        else:
+            flash("كلمة المرور غير صحيحة", "danger")
+
+    if not session.get('is_admin'):
+        return render_template('admin_login.html')
+
+    if request.method == 'POST' and 'generate_code' in request.form:
+        import random, string
+        random_code = "DAQ-" + ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+        
+        school_year = request.form.get('school_year')
+        subject = request.form.get('subject')
+        month = request.form.get('month')
+        duration_days = int(request.form.get('duration_days', 30))
+
+        supabase.table('access_codes').insert({
+            'code': random_code,
+            'grade': school_year,
+            'subject': subject,
+            'month': month,
+            'is_used': False
+        }).execute()
+        flash(f"تم توليد الكود بنجاح: {random_code}", "success")
+
+    codes_res = supabase.table('access_codes').select('*').order('id', desc=True).execute()
+    return render_template('admin_panel.html', codes=codes_res.data)
+
 @app.route('/logout')
 def logout():
     session.clear()
-    return redirect(url_for('login'))
+    return redirect(url_for('home'))
 
 if __name__ == '__main__':
     app.run(debug=True)
