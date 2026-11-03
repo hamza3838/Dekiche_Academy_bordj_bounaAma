@@ -127,19 +127,29 @@ def teacher_dashboard():
         video_url = request.form.get('video_url')
         pdf_url = request.form.get('pdf_url')
 
-        supabase.table('lessons').insert({
-            'school_year': school_year,
-            'subject': subject,
-            'month': month,
-            'week': week,
-            'title': title,
-            'video_url': video_url,
-            'pdf_url': pdf_url
-        }).execute()
-        flash("تم إضافة الدرس بنجاح!", "success")
+        try:
+            supabase.table('lessons').insert({
+                'school_year': school_year,
+                'subject': subject,
+                'month': month,
+                'week': week,
+                'title': title,
+                'video_url': video_url,
+                'pdf_url': pdf_url
+            }).execute()
+            flash("تم إضافة الدرس بنجاح!", "success")
+        except Exception as e:
+            flash(f"خطأ أثناء إضافة الدرس: {e}", "danger")
 
-    lessons_res = supabase.table('lessons').select('*').order('created_at', desc=True).execute()
-    return render_template('teacher_dashboard.html', lessons=lessons_res.data)
+    lessons_data = []
+    try:
+        lessons_res = supabase.table('lessons').select('*').order('created_at', desc=True).execute()
+        if lessons_res and lessons_res.data:
+            lessons_data = lessons_res.data
+    except Exception as e:
+        print(f"⚠️ ملاحظة أثناء جلب الدروس: {e}")
+
+    return render_template('teacher_dashboard.html', lessons=lessons_data)
 
 # --- لوحة المشرف لتوليد الأكواد ---
 @app.route('/admin-secret-panel-daqiche', methods=['GET', 'POST'])
@@ -166,17 +176,27 @@ def admin_panel():
         month = request.form.get('month')
         duration_days = int(request.form.get('duration_days', 30))
 
-        supabase.table('access_codes').insert({
-            'code': random_code,
-            'grade': school_year,
-            'subject': subject,
-            'month': month,
-            'is_used': False
-        }).execute()
-        flash(f"تم توليد الكود بنجاح: {random_code}", "success")
+        try:
+            supabase.table('access_codes').insert({
+                'code': random_code,
+                'grade': school_year,
+                'subject': subject,
+                'month': month,
+                'is_used': False
+            }).execute()
+            flash(f"تم توليد الكود بنجاح: {random_code}", "success")
+        except Exception as e:
+            flash(f"خطأ أثناء حفظ الكود في قاعدة البيانات: {e}", "danger")
 
-    codes_res = supabase.table('access_codes').select('*').order('id', desc=True).execute()
-    return render_template('admin_panel.html', codes=codes_res.data)
+    codes = []
+    try:
+        codes_res = supabase.table('access_codes').select('*').order('id', desc=True).execute()
+        if codes_res and codes_res.data:
+            codes = codes_res.data
+    except Exception as e:
+        print(f"⚠️ ملاحظة أثناء جلب الأكواد: {e}")
+
+    return render_template('admin_panel.html', codes=codes)
 
 @app.route('/logout')
 def logout():
