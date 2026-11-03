@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>تسجيل دخول المشرف - أكاديمية دقيش</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@3.4.17/dist/tailwind.min.css">
+    <style>body { font-family: Tahoma, sans-serif; background: #101e2a; color: #f7f3ea; }</style>
+</head>
+<body class="flex items-center justify-center min-h-screen">
+    <div class="bg-[#192b39] p-8 rounded-2xl border border-[#e9bd68]/30 max-w-md w-full shadow-2xl text-center">
+        <h2 class="text-2xl font-bold mb-6 text-[#e9bd68]">لوحة تحكم المشرف</h2>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for cat, msg in messages %}
+                    <div class="mb-4 p-3 rounded-xl bg-red-900/50 border border-red-500 text-red-200 text-sm">{{ msg }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        <form method="POST" class="space-y-4">
+            <input type="password" name="password" placeholder="أدخل كلمة مرور المشرف" required class="w-full p-3 rounded-xl bg-[#101e2a] border border-[#617586] text-white outline-none focus:border-[#e9bd68]">
+            <button type="submit" class="w-full py-3 bg-[#e9bd68] text-[#101e2a] font-bold rounded-xl hover:brightness-110 transition">دخول</button>
+        </form>
+        <div class="mt-4"><a href="/" class="text-sm text-[#b8c7d0] hover:underline">العودة للرئيسية</a></div>
+    </div>
+</body>
+</html>
