@@ -3,84 +3,100 @@
 <head>
     <meta charset="UTF-8">
     <title>لوحة المشرف - أكاديمية دقيش</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@3.4.17/dist/tailwind.min.css">
+    <style>body { font-family: Tahoma, sans-serif; background: #101e2a; color: #f7f3ea; }</style>
 </head>
-<body>
-    <div class="navbar">
-        <h1>لوحة تحكم المشرف (توليد الأكواد)</h1>
-        <a href="{{ url_for('logout') }}" style="color: white; text-decoration: none; background: #c0392b; padding: 6px 15px; border-radius: 4px;">خروج</a>
-    </div>
+<body class="p-6">
+    <div class="max-w-5xl mx-auto space-y-6">
+        <div class="flex justify-between items-center bg-[#192b39] p-6 rounded-2xl border border-[#e9bd68]/30 shadow-xl">
+            <h1 class="text-2xl font-bold text-[#e9bd68]">لوحة تحكم المشرف - أكاديمية دقيش</h1>
+            <a href="/logout" class="px-4 py-2 bg-red-600/80 text-white rounded-xl hover:bg-red-700 transition">تسجيل الخروج</a>
+        </div>
 
-    <div class="container">
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% for cat, msg in messages %}
+                    <div class="p-4 rounded-xl {% if cat == 'success' %}bg-green-900/50 border border-green-500 text-green-200{% else %}bg-red-900/50 border border-red-500 text-red-200{% endif %}">{{ msg }}</div>
                 {% endfor %}
             {% endif %}
         {% endwith %}
 
-        <form method="POST">
-            <input type="hidden" name="generate_code" value="true">
-            
-            <label>السنة الدراسية:</label>
-            <select name="school_year" required>
-                <option value="السنة الخامسة ابتدائي">السنة الخامسة ابتدائي</option>
-                <option value="السنة الرابعة ابتدائي">السنة الرابعة ابتدائي</option>
-                <option value="السنة الثالثة ابتدائي">السنة الثالثة ابتدائي</option>
-            </select>
+        <div class="bg-[#192b39] p-6 rounded-2xl border border-[#e9bd68]/30 shadow-xl">
+            <h2 class="text-xl font-bold mb-4">توليد كود تفعيل جديد</h2>
+            <form method="POST" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <input type="hidden" name="generate_code" value="1">
+                <div>
+                    <label class="block mb-1 text-sm text-[#b8c7d0]">السن الدراسي:</label>
+                    <select name="school_year" required class="w-full p-3 rounded-xl bg-[#101e2a] border border-[#617586] text-white outline-none">
+                        <option value="السنة الأولى ابتدائي">السنة الأولى ابتدائي</option>
+                        <option value="السنة الثانية ابتدائي">السنة الثانية ابتدائي</option>
+                        <option value="السنة الثالثة ابتدائي">السنة الثالثة ابتدائي</option>
+                        <option value="السنة الرابعة ابتدائي">السنة الرابعة ابتدائي</option>
+                        <option value="السنة الخامسة ابتدائي">السنة الخامسة ابتدائي</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block mb-1 text-sm text-[#b8c7d0]">المادة:</label>
+                    <select name="subject" required class="w-full p-3 rounded-xl bg-[#101e2a] border border-[#617586] text-white outline-none">
+                        <option value="اللغة العربية">اللغة العربية</option>
+                        <option value="الرياضيات">الرياضيات</option>
+                        <option value="الإنجليزية">الإنجليزية</option>
+                        <option value="الفرنسية">الفرنسية</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block mb-1 text-sm text-[#b8c7d0]">الشهر:</label>
+                    <select name="month" required class="w-full p-3 rounded-xl bg-[#101e2a] border border-[#617586] text-white outline-none">
+                        <option value="سبتمبر">سبتمبر</option>
+                        <option value="أكتوبر">أكتوبر</option>
+                        <option value="نوفمبر">نوفمبر</option>
+                        <option value="ديسمبر">ديسمبر</option>
+                        <option value="جانفي">جانفي</option>
+                        <option value="فيفري">فيفري</option>
+                        <option value="مارس">مارس</option>
+                        <option value="أفريل">أفريل</option>
+                        <option value="ماي">ماي</option>
+                    </select>
+                </div>
+                <div class="flex items-end">
+                    <button type="submit" class="w-full py-3 bg-[#e9bd68] text-[#101e2a] font-bold rounded-xl hover:brightness-110 transition">توليد الكود</button>
+                </div>
+            </form>
+        </div>
 
-            <label>المادة:</label>
-            <select name="subject" required>
-                <option value="الرياضيات">الرياضيات</option>
-                <option value="اللغة العربية">اللغة العربية</option>
-            </select>
-
-            <label>الشهر المخصص:</label>
-            <select name="month" required>
-                <option value="شهر أكتوبر">شهر أكتوبر</option>
-                <option value="شهر نوفمبر">شهر نوفمبر</option>
-                <option value="شهر ديسمبر">شهر ديسمبر</option>
-                <option value="شهر جانفي">شهر جانفي</option>
-                <option value="شهر فيفري">شهر فيفري</option>
-                <option value="شهر مارس">شهر مارس</option>
-                <option value="شهر أفريل">شهر أفريل</option>
-                <option value="شهر ماي">شهر ماي</option>
-            </select>
-
-            <label>مدة الصلاحية (بالأيام):</label>
-            <input type="number" name="duration_days" value="30" required>
-
-            <button type="submit" class="btn-primary" style="width: 100%;">توليد كود جديد عشوائي</button>
-        </form>
-
-        <h3 style="margin-top: 40px;">الأكواد المُولدة مسبقاً:</h3>
-        <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
-            <thead>
-                <tr style="background: #f1f1f1; text-align: right;">
-                    <th style="padding: 10px; border: 1px solid #ddd;">الكود</th>
-                    <th style="padding: 10px; border: 1px solid #ddd;">السنة والمادة</th>
-                    <th style="padding: 10px; border: 1px solid #ddd;">الشهر</th>
-                    <th style="padding: 10px; border: 1px solid #ddd;">الحالة</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for c in codes %}
-                <tr>
-                    <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold; color: #4A154B;">{{ c.code }}</td>
-                    <td style="padding: 10px; border: 1px solid #ddd;">{{ c.school_year }} - {{ c.subject }}</td>
-                    <td style="padding: 10px; border: 1px solid #ddd;">{{ c.month }}</td>
-                    <td style="padding: 10px; border: 1px solid #ddd;">
-                        {% if c.is_used %}
-                            <span style="color: red;">مستعمل</span>
-                        {% else %}
-                            <span style="color: green;">غير مستعمل</span>
-                        {% endif %}
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        <div class="bg-[#192b39] p-6 rounded-2xl border border-[#e9bd68]/30 shadow-xl overflow-x-auto">
+            <h2 class="text-xl font-bold mb-4">قائمة الأكواد المُولّدة</h2>
+            <table class="w-full text-right border-collapse">
+                <thead>
+                    <tr class="border-b border-white/20 text-[#e9bd68]">
+                        <th class="p-3">الكود</th>
+                        <th class="p-3">السنة</th>
+                        <th class="p-3">المادة</th>
+                        <th class="p-3">الشهر</th>
+                        <th class="p-3">الحالة</th>
+                        <th class="p-3">التلميذ المستفيد</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if codes %}
+                        {% for c in codes %}
+                        <tr class="border-b border-white/10 hover:bg-white/5">
+                            <td class="p-3 font-mono text-[#e9bd68]">{{ c.code }}</td>
+                            <td class="p-3">{{ c.grade }}</td>
+                            <td class="p-3">{{ c.subject }}</td>
+                            <td class="p-3">{{ c.month }}</td>
+                            <td class="p-3">
+                                {% if c.is_used %}<span class="text-red-400">مستخدم</span>{% else %}<span class="text-green-400">غير مستخدم</span>{% endif %}
+                            </td>
+                            <td class="p-3">{{ c.student_name or '-' }} ({{ c.phone or '-' }})</td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr><td colspan="6" class="p-4 text-center text-gray-400">لا توجد أكواد مولّدة حتى الآن</td></tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
     </div>
 </body>
 </html>
