@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>دخول الأساتذة - أكاديمية دقيش</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container" style="max-width: 500px; margin-top: 80px;">
+        <h2 style="color: #4A154B; text-align: center;">دخول الأساتذة</h2>
+        <p style="text-align: center; color: #666; margin-bottom: 25px;">أكاديمية دقيش التعليمية</p>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST">
+            <label>كلمة مرور الأستاذ:</label>
+            <input type="password" name="password" required placeholder="أدخل كلمة المرور الخاصة بالأستاذ">
+            <button type="submit" class="btn-primary" style="width: 100%;">تسجيل الدخول</button>
+        </form>
+
+        <div style="text-align: center; margin-top: 20px;">
+            <a href="{{ url_for('home') }}" style="color: #4A154B; text-decoration: none;">العودة للرئيسية</a>
+        </div>
+    </div>
+</body>
+</html>
