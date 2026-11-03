@@ -45,7 +45,8 @@ def student_login():
 
     elif action == 'redeem':
         code_text = request.form.get('code')
-        code_res = supabase.table('access_codes').select('*').eq('code', code_text).eq('is_used', False).execute()
+        # البحث عن الكود غير المستخدم (is_registered = 0)
+        code_res = supabase.table('access_codes').select('*').eq('code', code_text).eq('is_registered', 0).execute()
         
         if not code_res.data:
             flash("الكود غير صالح أو تم استخدامه مسبقاً!", "danger")
@@ -53,10 +54,11 @@ def student_login():
         
         code_data = code_res.data[0]
 
+        # تحديث الكود وتعيينه كمستخدم (is_registered = 1)
         supabase.table('access_codes').update({
             'student_name': full_name,
             'phone': phone,
-            'is_used': True
+            'is_registered': 1
         }).eq('id', code_data['id']).execute()
 
         session['student_name'] = full_name
@@ -84,8 +86,7 @@ def student_dashboard():
             for sub in subscriptions:
                 g_val = sub.get('grade') or sub.get('school_year')
                 sub_val = sub.get('subject')
-                # دعم الحقلين معا (month أو code_month) لمنع أي خطأ داخلي
-                m_val = sub.get('month') or sub.get('code_month')
+                m_val = sub.get('code_month') or sub.get('month')
                 
                 if g_val and sub_val and m_val:
                     l_res = supabase.table('lessons').select('*').eq('school_year', g_val).eq('subject', sub_val).eq('month', str(m_val)).execute()
@@ -172,12 +173,13 @@ def admin_panel():
         month = request.form.get('month')
 
         try:
+            # التوافق مع أعمدة الجدول الموجودة لديك (grade, code_month, is_registered)
             supabase.table('access_codes').insert({
                 'code': random_code,
                 'grade': school_year,
                 'subject': subject,
-                'month': month,
-                'is_used': False
+                'code_month': month,
+                'is_registered': 0
             }).execute()
             flash(f"تم توليد الكود بنجاح: {random_code}", "success")
         except Exception as e:
