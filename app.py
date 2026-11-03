@@ -54,7 +54,7 @@ def student_login():
         
         code_data = code_res.data[0]
 
-        # تحديث الكود وتعيينه كمستخدم (is_registered = 1)
+        # تحديث الكود بالبيانات الحقيقية للتلميذ وتعيينه كمستخدم (is_registered = 1)
         supabase.table('access_codes').update({
             'student_name': full_name,
             'phone': phone,
@@ -173,13 +173,15 @@ def admin_panel():
         month = request.form.get('month')
 
         try:
-            # التوافق التام مع الأعمدة الفعلية في قاعدة البيانات (grade, month, is_registered)
+            # إضافة قيم مؤقتة لـ student_name و phone لتجنب خطأ القيود (Not-Null Constraint)
             supabase.table('access_codes').insert({
                 'code': random_code,
                 'grade': school_year,
                 'subject': subject,
                 'month': month,
-                'is_registered': 0
+                'is_registered': 0,
+                'student_name': "غير محدد",
+                'phone': "0000000000"
             }).execute()
             flash(f"تم توليد الكود بنجاح: {random_code}", "success")
         except Exception as e:
