@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>لوحة المشرف - أكاديمية دقيش</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="navbar">
+        <h1>لوحة تحكم المشرف (توليد الأكواد)</h1>
+        <a href="{{ url_for('logout') }}" style="color: white; text-decoration: none; background: #c0392b; padding: 6px 15px; border-radius: 4px;">خروج</a>
+    </div>
+
+    <div class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST">
+            <input type="hidden" name="generate_code" value="true">
+            
+            <label>السنة الدراسية:</label>
+            <select name="school_year" required>
+                <option value="السنة الخامسة ابتدائي">السنة الخامسة ابتدائي</option>
+                <option value="السنة الرابعة ابتدائي">السنة الرابعة ابتدائي</option>
+                <option value="السنة الثالثة ابتدائي">السنة الثالثة ابتدائي</option>
+            </select>
+
+            <label>المادة:</label>
+            <select name="subject" required>
+                <option value="الرياضيات">الرياضيات</option>
+                <option value="اللغة العربية">اللغة العربية</option>
+            </select>
+
+            <label>الشهر المخصص:</label>
+            <select name="month" required>
+                <option value="شهر أكتوبر">شهر أكتوبر</option>
+                <option value="شهر نوفمبر">شهر نوفمبر</option>
+                <option value="شهر ديسمبر">شهر ديسمبر</option>
+                <option value="شهر جانفي">شهر جانفي</option>
+                <option value="شهر فيفري">شهر فيفري</option>
+                <option value="شهر مارس">شهر مارس</option>
+                <option value="شهر أفريل">شهر أفريل</option>
+                <option value="شهر ماي">شهر ماي</option>
+            </select>
+
+            <label>مدة الصلاحية (بالأيام):</label>
+            <input type="number" name="duration_days" value="30" required>
+
+            <button type="submit" class="btn-primary" style="width: 100%;">توليد كود جديد عشوائي</button>
+        </form>
+
+        <h3 style="margin-top: 40px;">الأكواد المُولدة مسبقاً:</h3>
+        <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+            <thead>
+                <tr style="background: #f1f1f1; text-align: right;">
+                    <th style="padding: 10px; border: 1px solid #ddd;">الكود</th>
+                    <th style="padding: 10px; border: 1px solid #ddd;">السنة والمادة</th>
+                    <th style="padding: 10px; border: 1px solid #ddd;">الشهر</th>
+                    <th style="padding: 10px; border: 1px solid #ddd;">الحالة</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for c in codes %}
+                <tr>
+                    <td style="padding: 10px; border: 1px solid #ddd; font-weight: bold; color: #4A154B;">{{ c.code }}</td>
+                    <td style="padding: 10px; border: 1px solid #ddd;">{{ c.school_year }} - {{ c.subject }}</td>
+                    <td style="padding: 10px; border: 1px solid #ddd;">{{ c.month }}</td>
+                    <td style="padding: 10px; border: 1px solid #ddd;">
+                        {% if c.is_used %}
+                            <span style="color: red;">مستعمل</span>
+                        {% else %}
+                            <span style="color: green;">غير مستعمل</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
