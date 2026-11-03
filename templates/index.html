@@ -7,7 +7,11 @@
 </head>
 <body>
     <div class="container" style="max-width: 600px; margin-top: 60px; text-align: center;">
-        <!-- يمكنك رفع شعارك في مجلد static باسم logo.png واستدعائه هنا -->
+        <!-- عرض شعار أكاديمية دقيش -->
+<div style="text-align: center; margin-bottom: 20px;">
+    <img src="{{ url_for('static', filename='logo.png') }}" alt="شعار أكاديمية دقيش التعليمية" style="max-width: 180px; height: auto;">
+</div>
+<h2 style="color: #4A154B; margin-bottom: 5px;">أكاديمية دقيش التعليمية</h2>
         <h2 style="color: #4A154B; margin-bottom: 5px;">أكاديمية دقيش التعليمية</h2>
         <p style="color: #666; margin-bottom: 30px;">منصتك التعليمية الموثوقة للنجاح والتفوق</p>
 
