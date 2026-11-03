@@ -1,6 +1,9 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 from supabase import create_client, Client
 import os
+import datetime
+import random
+import string
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "dar_daqiche_secret_key_2026")
@@ -165,15 +168,16 @@ def admin_panel():
         return render_template('admin_panel.html', codes=[])
 
     if request.method == 'POST' and 'generate_code' in request.form:
-        import random, string
         random_code = "DAQ-" + ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
         
         school_year = request.form.get('school_year')
         subject = request.form.get('subject')
         month = request.form.get('month')
 
+        # تحديد تاريخ انتهاء افتراضي (بعد سنة من الآن) لتجنب خطأ expires_at
+        future_date = (datetime.datetime.now() + datetime.timedelta(days=365)).strftime('%Y-%m-%d %H:%M:%S')
+
         try:
-            # إضافة قيم مؤقتة لـ student_name و phone لتجنب خطأ القيود (Not-Null Constraint)
             supabase.table('access_codes').insert({
                 'code': random_code,
                 'grade': school_year,
@@ -181,7 +185,8 @@ def admin_panel():
                 'month': month,
                 'is_registered': 0,
                 'student_name': "غير محدد",
-                'phone': "0000000000"
+                'phone': "0000000000",
+                'expires_at': future_date
             }).execute()
             flash(f"تم توليد الكود بنجاح: {random_code}", "success")
         except Exception as e:
