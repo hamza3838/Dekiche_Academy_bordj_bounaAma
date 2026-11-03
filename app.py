@@ -5,9 +5,16 @@ import os
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "dar_daqiche_secret_key_2026")
 
-# إعداد اتصال Supabase
-SUPABASE_URL = os.environ.get("SUPABASE_URL", "YOUR_SUPABASE_URL")
-SUPABASE_KEY = os.environ.get("SUPABASE_KEY", "YOUR_SUPABASE_KEY")
+# قراءة وتنظيف متغيرات البيئة بسلامة تامة
+SUPABASE_URL = os.environ.get("SUPABASE_URL", "").strip()
+SUPABASE_KEY = os.environ.get("SUPABASE_KEY", "").strip()
+
+# حماية التطبيق من الانهيار إذا كانت المتغيرات فارغة مؤقتاً أثناء الإقلاع
+if not SUPABASE_URL or not SUPABASE_URL.startswith("http"):
+    print("⚠️ تحذير: SUPABASE_URL غير مضبوط بشكل صحيح في البيئة، يتم استخدام رابط مؤقت لتفادي التوقف.")
+    SUPABASE_URL = "https://placeholder.supabase.co"
+    SUPABASE_KEY = "placeholder_key"
+
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 # كلمات المرور
@@ -56,105 +63,4 @@ def student_login():
 
         session['student_name'] = full_name
         session['phone'] = phone
-        flash("تم تفعيل اشتراكك بنجاح!", "success")
-        return redirect(url_for('student_dashboard'))
-
-# --- لوحة تحكم التلميذ ---
-@app.route('/student-dashboard')
-def student_dashboard():
-    if 'student_name' not in session:
-        return redirect(url_for('home'))
-
-    student_name = session['student_name']
-    
-    # جلب جميع اشتراكات وپاقات التلميذ الفعالة
-    subs_res = supabase.table('access_codes').select('*').eq('student_name', student_name).execute()
-    subscriptions = subs_res.data
-
-    # جلب الدروس المطابقة للمواد والسنوات التي اشتراها التلميذ
-    lessons = []
-    if subscriptions:
-        for sub in subscriptions:
-            l_res = supabase.table('lessons').select('*').eq('school_year', sub.get('grade')).eq('subject', sub.get('subject')).eq('month', sub.get('month')).execute()
-            lessons.extend(l_res.data)
-
-    return render_template('student_dashboard.html', student_name=student_name, subscriptions=subscriptions, lessons=lessons)
-
-# --- بوابة الأستاذ ---
-@app.route('/teacher-login', methods=['GET', 'POST'])
-def teacher_login():
-    if request.method == 'POST':
-        if request.form.get('password') == TEACHER_PASSWORD:
-            session['is_teacher'] = True
-            return redirect(url_for('teacher_dashboard'))
-        flash("كلمة مرور الأستاذ غير صحيحة", "danger")
-    return render_template('teacher_login.html')
-
-@app.route('/teacher-dashboard', methods=['GET', 'POST'])
-def teacher_dashboard():
-    if not session.get('is_teacher'):
-        return redirect(url_for('teacher_login'))
-
-    if request.method == 'POST':
-        school_year = request.form.get('school_year')
-        subject = request.form.get('subject')
-        month = request.form.get('month')
-        week = request.form.get('week')
-        title = request.form.get('title')
-        video_url = request.form.get('video_url')
-        pdf_url = request.form.get('pdf_url')
-
-        supabase.table('lessons').insert({
-            'school_year': school_year,
-            'subject': subject,
-            'month': month,
-            'week': week,
-            'title': title,
-            'video_url': video_url,
-            'pdf_url': pdf_url
-        }).execute()
-        flash("تم إضافة الدرس بنجاح!", "success")
-
-    lessons_res = supabase.table('lessons').select('*').order('created_at', desc=True).execute()
-    return render_template('teacher_dashboard.html', lessons=lessons_res.data)
-
-# --- لوحة المشرف لتوليد الأكواد ---
-@app.route('/admin-secret-panel-daqiche', methods=['GET', 'POST'])
-def admin_panel():
-    if request.method == 'POST' and 'password' in request.form:
-        if request.form.get('password') == ADMIN_PASSWORD:
-            session['is_admin'] = True
-        else:
-            flash("كلمة المرور غير صحيحة", "danger")
-
-    if not session.get('is_admin'):
-        return render_template('admin_login.html')
-
-    if request.method == 'POST' and 'generate_code' in request.form:
-        import random, string
-        random_code = "DAQ-" + ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
-        
-        school_year = request.form.get('school_year')
-        subject = request.form.get('subject')
-        month = request.form.get('month')
-        duration_days = int(request.form.get('duration_days', 30))
-
-        supabase.table('access_codes').insert({
-            'code': random_code,
-            'grade': school_year,
-            'subject': subject,
-            'month': month,
-            'is_used': False
-        }).execute()
-        flash(f"تم توليد الكود بنجاح: {random_code}", "success")
-
-    codes_res = supabase.table('access_codes').select('*').order('id', desc=True).execute()
-    return render_template('admin_panel.html', codes=codes_res.data)
-
-@app.route('/logout')
-def logout():
-    session.clear()
-    return redirect(url_for('home'))
-
-if __name__ == '__main__':
-    app.run(debug=True)
+        flash("تم تفعيل اشتراكك بنجاح!", "
