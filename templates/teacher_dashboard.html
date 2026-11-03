@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>لوحة تحكم الأستاذ - أكاديمية دقيش</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="navbar">
+        <h1>لوحة تحكم الأستاذ - أكاديمية دقيش التعليمية</h1>
+        <a href="{{ url_for('logout') }}" style="color: white; text-decoration: none; background: #c0392b; padding: 6px 15px; border-radius: 4px;">تسجيل الخروج</a>
+    </div>
+
+    <div class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <h3>إضافة درس جديد (مرتب حسب السنة، المادة، الشهر، والأسبوع):</h3>
+        <form method="POST" style="background: #fdfbfd; padding: 20px; border-radius: 8px; border: 1px solid #eee;">
+            <label>السنة الدراسية:</label>
+            <select name="school_year" required>
+                <option value="السنة الخامسة ابتدائي">السنة الخامسة ابتدائي</option>
+                <option value="السنة الرابعة ابتدائي">السنة الرابعة ابتدائي</option>
+                <option value="السنة الثالثة ابتدائي">السنة الثالثة ابتدائي</option>
+            </select>
+
+            <label>المادة:</label>
+            <select name="subject" required>
+                <option value="الرياضيات">الرياضيات</option>
+                <option value="اللغة العربية">اللغة العربية</option>
+            </select>
+
+            <label>الشهر:</label>
+            <select name="month" required>
+                <option value="شهر أكتوبر">شهر أكتوبر</option>
+                <option value="شهر نوفمبر">شهر نوفمبر</option>
+                <option value="شهر ديسمبر">شهر ديسمبر</option>
+                <option value="شهر جانفي">شهر جانفي</option>
+                <option value="شهر فيفري">شهر فيفري</option>
+                <option value="شهر مارس">شهر مارس</option>
+                <option value="شهر أفريل">شهر أفريل</option>
+                <option value="شهر ماي">شهر ماي</option>
+            </select>
+
+            <label>الأسبوع:</label>
+            <select name="week" required>
+                <option value="الأسبوع الأول">الأسبوع الأول</option>
+                <option value="الأسبوع الثاني">الأسبوع الثاني</option>
+                <option value="الأسبوع الثالث">الأسبوع الثالث</option>
+                <option value="الأسبوع الرابع">الأسبوع الرابع</option>
+            </select>
+
+            <label>عنوان الدرس:</label>
+            <input type="text" name="title" required placeholder="مثال: درس القسمة - الجزء الأول">
+
+            <label>رابط فيديو يوتيوب (Embed URL):</label>
+            <input type="text" name="video_url" placeholder="مثال: https://www.youtube.com/embed/xxxxxx">
+
+            <label>رابط ملف الـ PDF:</label>
+            <input type="text" name="pdf_url" placeholder="رابط ملف PDF (يمكنك رفعه على Supabase Storage)">
+
+            <button type="submit" class="btn-primary" style="width: 100%; margin-top: 10px;">إضافة ونشر الدرس</button>
+        </form>
+
+        <h3 style="margin-top: 40px;">الدروس المضافة مسبقاً:</h3>
+        {% if lessons %}
+            {% for lesson in lessons %}
+                <div class="card">
+                    <span style="font-size: 12px; background: #4A154B; color: white; padding: 3px 8px; border-radius: 4px;">{{ lesson.school_year }} | {{ lesson.subject }} | {{ lesson.month }} | {{ lesson.week }}</span>
+                    <h4 style="margin-top: 10px;">{{ lesson.title }}</h4>
+                    {% if lesson.pdf_url %}
+                        <p><a href="{{ lesson.pdf_url }}" target="_blank" style="color: #4A154B;">📄 عرض ملف الـ PDF</a></p>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        {% else %}
+            <p style="color: #666; text-align: center; padding: 20px;">لم تقم بإضافة أي دروس بعد.</p>
+        {% endif %}
+    </div>
+</body>
+</html>
