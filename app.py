@@ -86,7 +86,7 @@ def student_dashboard():
             for sub in subscriptions:
                 g_val = sub.get('grade') or sub.get('school_year')
                 sub_val = sub.get('subject')
-                m_val = sub.get('code_month') or sub.get('month')
+                m_val = sub.get('month') or sub.get('code_month')
                 
                 if g_val and sub_val and m_val:
                     l_res = supabase.table('lessons').select('*').eq('school_year', g_val).eq('subject', sub_val).eq('month', str(m_val)).execute()
@@ -173,12 +173,12 @@ def admin_panel():
         month = request.form.get('month')
 
         try:
-            # التوافق مع أعمدة الجدول الموجودة لديك (grade, code_month, is_registered)
+            # التوافق التام مع الأعمدة الفعلية في قاعدة البيانات (grade, month, is_registered)
             supabase.table('access_codes').insert({
                 'code': random_code,
                 'grade': school_year,
                 'subject': subject,
-                'code_month': month,
+                'month': month,
                 'is_registered': 0
             }).execute()
             flash(f"تم توليد الكود بنجاح: {random_code}", "success")
