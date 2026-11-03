@@ -5,12 +5,9 @@ import os
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "dar_daqiche_secret_key_2026")
 
-SUPABASE_URL = os.environ.get("SUPABASE_URL", "").strip()
-SUPABASE_KEY = os.environ.get("SUPABASE_KEY", "").strip()
-
-if not SUPABASE_URL or not SUPABASE_URL.startswith("http"):
-    SUPABASE_URL = "https://placeholder.supabase.co"
-    SUPABASE_KEY = "placeholder_key"
+# --- بيانات الاتصال بقاعدة بيانات Supabase مباشرة وثابتة ---
+SUPABASE_URL = "https://dobbzqbdlpzfqsewcjoz.supabase.co".strip()
+SUPABASE_KEY = "sb_publishable_eKgLBVGVdl_sHr473DZOFg_Pti54xCy".strip()
 
 try:
     supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
