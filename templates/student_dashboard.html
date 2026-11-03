@@ -8,7 +8,7 @@
 <body>
     <div class="navbar">
         <h1>أكاديمية دقيش التعليمية - مرحباً بك، {{ student_name }}</h1>
-        <a href="{{ url_for('logout') }}" style="color: white; text-decoration: background; background: #c0392b; padding: 6px 15px; border-radius: 4px;">تسجيل الخروج</a>
+        <a href="{{ url_for('logout') }}" style="color: white; text-decoration: none; background: #c0392b; padding: 6px 15px; border-radius: 4px;">تسجيل الخروج</a>
     </div>
 
     <div class="container">
@@ -32,7 +32,15 @@
                     
                     {% if lesson.video_url %}
                         <div style="margin: 15px 0;">
-                            <iframe width="100%" height="315" src="{{ lesson.video_url }}" frameborder="0" allowfullscreen style="border-radius: 8px;"></iframe>
+                            {% set v_url = lesson.video_url %}
+                            {% if "youtu.be/" in v_url %}
+                                {% set embed_url = "https://www.youtube.com/embed/" + v_url.split("youtu.be/")[1].split("?")[0] %}
+                            {% elif "watch?v=" in v_url %}
+                                {% set embed_url = "https://www.youtube.com/embed/" + v_url.split("watch?v=")[1].split("&")[0] %}
+                            {% else %}
+                                {% set embed_url = v_url %}
+                            {% endif %}
+                            <iframe width="100%" height="315" src="{{ embed_url }}" frameborder="0" allowfullscreen style="border-radius: 8px;"></iframe>
                         </div>
                     {% endif %}
 
