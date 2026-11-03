@@ -2,85 +2,162 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>لوحة تحكم الأستاذ - أكاديمية دقيش</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; }
+        body { background: #0f172a; color: #f8fafc; min-height: 100vh; padding: 20px; direction: rtl; }
+        .wrapper { max-width: 1100px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px; }
+        
+        .top-bar { background: #1e293b; border: 1px solid rgba(233, 189, 104, 0.2); border-radius: 16px; padding: 20px 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+        .top-bar h1 { color: #e9bd68; font-size: 22px; font-weight: 700; }
+        .btn-logout { background: #ef4444; color: white; padding: 8px 18px; border-radius: 10px; text-decoration: none; font-weight: 600; font-size: 14px; transition: 0.2s; }
+        .btn-logout:hover { background: #dc2626; }
+
+        .card { background: #1e293b; border: 1px solid rgba(233, 189, 104, 0.2); border-radius: 16px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+        .card h2 { color: #e9bd68; font-size: 18px; margin-bottom: 16px; font-weight: 600; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; }
+
+        .alert { padding: 14px 18px; border-radius: 12px; margin-bottom: 20px; font-size: 14px; font-weight: 600; }
+        .alert-success { background: rgba(34, 197, 94, 0.15); border: 1px solid #22c55e; color: #86efac; }
+        .alert-danger { background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; color: #fca5a5; }
+
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 16px; }
+        .form-group label { display: block; font-size: 13px; color: #94a3b8; margin-bottom: 6px; font-weight: 600; }
+        .form-group select, .form-group input { width: 100%; padding: 12px; background: #0f172a; border: 1px solid #334155; color: #f8fafc; border-radius: 10px; font-size: 14px; outline: none; transition: 0.2s; }
+        .form-group select:focus, .form-group input:focus { border-color: #e9bd68; }
+        .btn-submit { background: #e9bd68; color: #0f172a; padding: 12px; border: none; border-radius: 10px; font-weight: 700; font-size: 15px; cursor: pointer; width: 100%; transition: 0.2s; margin-top: 10px; }
+        .btn-submit:hover { filter: brightness(1.1); }
+
+        .table-responsive { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; text-align: right; }
+        th, td { padding: 14px 16px; font-size: 14px; border-bottom: 1px solid #334155; }
+        th { color: #e9bd68; font-weight: 600; background: rgba(15, 23, 42, 0.4); }
+        .empty-row { text-align: center; color: #94a3b8; padding: 30px; font-size: 14px; }
+        a.link-val { color: #38bdf8; text-decoration: none; }
+        a.link-val:hover { text-decoration: underline; }
+    </style>
 </head>
 <body>
-    <div class="navbar">
-        <h1>لوحة تحكم الأستاذ - أكاديمية دقيش التعليمية</h1>
-        <a href="{{ url_for('logout') }}" style="color: white; text-decoration: none; background: #c0392b; padding: 6px 15px; border-radius: 4px;">تسجيل الخروج</a>
-    </div>
+    <div class="wrapper">
+        <div class="top-bar">
+            <h1>لوحة تحكم الأستاذ - إضافة الدروس</h1>
+            <a href="/logout" class="btn-logout">تسجيل الخروج</a>
+        </div>
 
-    <div class="container">
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% for cat, msg in messages %}
+                    <div class="alert alert-{{ 'success' if cat == 'success' else 'danger' }}">{{ msg }}</div>
                 {% endfor %}
             {% endif %}
         {% endwith %}
 
-        <h3>إضافة درس جديد (مرتب حسب السنة، المادة، الشهر، والأسبوع):</h3>
-        <form method="POST" style="background: #fdfbfd; padding: 20px; border-radius: 8px; border: 1px solid #eee;">
-            <label>السنة الدراسية:</label>
-            <select name="school_year" required>
-                <option value="السنة الخامسة ابتدائي">السنة الخامسة ابتدائي</option>
-                <option value="السنة الرابعة ابتدائي">السنة الرابعة ابتدائي</option>
-                <option value="السنة الثالثة ابتدائي">السنة الثالثة ابتدائي</option>
-            </select>
-
-            <label>المادة:</label>
-            <select name="subject" required>
-                <option value="الرياضيات">الرياضيات</option>
-                <option value="اللغة العربية">اللغة العربية</option>
-            </select>
-
-            <label>الشهر:</label>
-            <select name="month" required>
-                <option value="شهر أكتوبر">شهر أكتوبر</option>
-                <option value="شهر نوفمبر">شهر نوفمبر</option>
-                <option value="شهر ديسمبر">شهر ديسمبر</option>
-                <option value="شهر جانفي">شهر جانفي</option>
-                <option value="شهر فيفري">شهر فيفري</option>
-                <option value="شهر مارس">شهر مارس</option>
-                <option value="شهر أفريل">شهر أفريل</option>
-                <option value="شهر ماي">شهر ماي</option>
-            </select>
-
-            <label>الأسبوع:</label>
-            <select name="week" required>
-                <option value="الأسبوع الأول">الأسبوع الأول</option>
-                <option value="الأسبوع الثاني">الأسبوع الثاني</option>
-                <option value="الأسبوع الثالث">الأسبوع الثالث</option>
-                <option value="الأسبوع الرابع">الأسبوع الرابع</option>
-            </select>
-
-            <label>عنوان الدرس:</label>
-            <input type="text" name="title" required placeholder="مثال: درس القسمة - الجزء الأول">
-
-            <label>رابط فيديو يوتيوب (Embed URL):</label>
-            <input type="text" name="video_url" placeholder="مثال: https://www.youtube.com/embed/xxxxxx">
-
-            <label>رابط ملف الـ PDF:</label>
-            <input type="text" name="pdf_url" placeholder="رابط ملف PDF (يمكنك رفعه على Supabase Storage)">
-
-            <button type="submit" class="btn-primary" style="width: 100%; margin-top: 10px;">إضافة ونشر الدرس</button>
-        </form>
-
-        <h3 style="margin-top: 40px;">الدروس المضافة مسبقاً:</h3>
-        {% if lessons %}
-            {% for lesson in lessons %}
-                <div class="card">
-                    <span style="font-size: 12px; background: #4A154B; color: white; padding: 3px 8px; border-radius: 4px;">{{ lesson.school_year }} | {{ lesson.subject }} | {{ lesson.month }} | {{ lesson.week }}</span>
-                    <h4 style="margin-top: 10px;">{{ lesson.title }}</h4>
-                    {% if lesson.pdf_url %}
-                        <p><a href="{{ lesson.pdf_url }}" target="_blank" style="color: #4A154B;">📄 عرض ملف الـ PDF</a></p>
-                    {% endif %}
+        <div class="card">
+            <h2>إضافة درس جديد</h2>
+            <form method="POST">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>السن الدراسي:</label>
+                        <select name="school_year" required>
+                            <option value="السنة الأولى ابتدائي">السنة الأولى ابتدائي</option>
+                            <option value="السنة الثانية ابتدائي">السنة الثانية ابتدائي</option>
+                            <option value="السنة الثالثة ابتدائي">السنة الثالثة ابتدائي</option>
+                            <option value="السنة الرابعة ابتدائي">السنة الرابعة ابتدائي</option>
+                            <option value="السنة الخامسة ابتدائي">السنة الخامسة ابتدائي</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>المادة:</label>
+                        <select name="subject" required>
+                            <option value="اللغة العربية">اللغة العربية</option>
+                            <option value="الرياضيات">الرياضيات</option>
+                            <option value="الإنجليزية">الإنجليزية</option>
+                            <option value="الفرنسية">الفرنسية</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>الشهر:</label>
+                        <select name="month" required>
+                            <option value="سبتمبر">سبتمبر</option>
+                            <option value="أكتوبر">أكتوبر</option>
+                            <option value="نوفمبر">نوفمبر</option>
+                            <option value="ديسمبر">ديسمبر</option>
+                            <option value="جانفي">جانفي</option>
+                            <option value="فيفري">فيفري</option>
+                            <option value="مارس">مارس</option>
+                            <option value="أفريل">أفريل</option>
+                            <option value="ماي">ماي</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>الأسبوع:</label>
+                        <select name="week" required>
+                            <option value="الأسبوع الأول">الأسبوع الأول</option>
+                            <option value="الأسبوع الثاني">الأسبوع الثاني</option>
+                            <option value="الأسبوع الثالث">الأسبوع الثالث</option>
+                            <option value="الأسبوع الرابع">الأسبوع الرابع</option>
+                        </select>
+                    </div>
                 </div>
-            {% endfor %}
-        {% else %}
-            <p style="color: #666; text-align: center; padding: 20px;">لم تقم بإضافة أي دروس بعد.</p>
-        {% endif %}
+
+                <div class="form-grid" style="grid-template-columns: 1fr;">
+                    <div class="form-group">
+                        <label>عنوان الدرس:</label>
+                        <input type="text" name="title" placeholder="مثال: درس جمع الاعداد الطبيعية" required>
+                    </div>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>رابط الفيديو (Video URL):</label>
+                        <input type="url" name="video_url" placeholder="https://..." required>
+                    </div>
+                    <div class="form-group">
+                        <label>رابط ملف PDF (PDF URL):</label>
+                        <input type="url" name="pdf_url" placeholder="https://..." required>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-submit">حفظ وإضافة الدرس</button>
+            </form>
+        </div>
+
+        <div class="card">
+            <h2>الدروس المضافة مسبقاً</h2>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>السنة</th>
+                            <th>المادة</th>
+                            <th>الشهر / الأسبوع</th>
+                            <th>عنوان الدرس</th>
+                            <th>الفيديو</th>
+                            <th>الملف</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if lessons %}
+                            {% for l in lessons %}
+                            <tr>
+                                <td>{{ l.school_year }}</td>
+                                <td>{{ l.subject }}</td>
+                                <td>{{ l.month }} - {{ l.week }}</td>
+                                <td style="font-weight: 600; color: #e9bd68;">{{ l.title }}</td>
+                                <td><a href="{{ l.video_url }}" target="_blank" class="link-val">رابط الفيديو</a></td>
+                                <td><a href="{{ l.pdf_url }}" target="_blank" class="link-val">ملف PDF</a></td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="6" class="empty-row">لا توجد دروس مضافة حتى الآن</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 </body>
 </html>
