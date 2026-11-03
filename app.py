@@ -151,7 +151,7 @@ def teacher_dashboard():
 
     return render_template('teacher_dashboard.html', lessons=lessons_data)
 
-# --- لوحة المشرف لتوليد الأكواد ---
+# --- لوحة المشرف المباشرة والآمنة (بدون الحاجة لملفات قوالب خارجية) ---
 @app.route('/admin-secret-panel-daqiche', methods=['GET', 'POST'])
 def admin_panel():
     if request.method == 'POST' and 'password' in request.form:
@@ -161,47 +161,22 @@ def admin_panel():
             flash("كلمة المرور غير صحيحة", "danger")
 
     if not session.get('is_admin'):
-        return render_template('admin_login.html')
-
-    if not supabase:
-        flash("عذراً، الاتصال بقاعدة البيانات غير متوفر حالياً.", "danger")
-        return render_template('admin_panel.html', codes=[])
-
-    if request.method == 'POST' and 'generate_code' in request.form:
-        import random, string
-        random_code = "DAQ-" + ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
-        
-        school_year = request.form.get('school_year')
-        subject = request.form.get('subject')
-        month = request.form.get('month')
-        duration_days = int(request.form.get('duration_days', 30))
-
-        try:
-            supabase.table('access_codes').insert({
-                'code': random_code,
-                'grade': school_year,
-                'subject': subject,
-                'month': month,
-                'is_used': False
-            }).execute()
-            flash(f"تم توليد الكود بنجاح: {random_code}", "success")
-        except Exception as e:
-            flash(f"خطأ أثناء حفظ الكود في قاعدة البيانات: {e}", "danger")
-
-    codes = []
-    try:
-        codes_res = supabase.table('access_codes').select('*').order('id', desc=True).execute()
-        if codes_res and codes_res.data:
-            codes = codes_res.data
-    except Exception as e:
-        print(f"⚠️ ملاحظة أثناء جلب الأكواد: {e}")
-
-    return render_template('admin_panel.html', codes=codes)
-
-@app.route('/logout')
-def logout():
-    session.clear()
-    return redirect(url_for('home'))
-
-if __name__ == '__main__':
-    app.run(debug=True)
+        return '''
+        <!DOCTYPE html>
+        <html lang="ar" dir="rtl">
+        <head>
+            <meta charset="UTF-8">
+            <title>تسجيل دخول المشرف - أكاديمية دقيش</title>
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@3.4.17/dist/tailwind.min.css">
+            <style>body { font-family: Tahoma, sans-serif; background: #101e2a; color: #f7f3ea; }</style>
+        </head>
+        <body class="flex items-center justify-center min-h-screen">
+            <div class="bg-[#192b39] p-8 rounded-2xl border border-[#e9bd68]/30 max-w-md w-full shadow-2xl text-center">
+                <h2 class="text-2xl font-bold mb-6 text-[#e9bd68]">لوحة تحكم المشرف</h2>
+                <form method="POST" class="space-y-4">
+                    <input type="password" name="password" placeholder="أدخل كلمة مرور المشرف" required class="w-full p-3 rounded-xl bg-[#101e2a] border border-[#617586] text-white outline-none focus:border-[#e9bd68]">
+                    <button type="submit" class="w-full py-3 bg-[#e9bd68] text-[#101e2a] font-bold rounded-xl hover:brightness-110 transition">دخول</button>
+                </form>
+                <div class="mt-4"><a href="/" class="text-sm text-[#b8c7d0] hover:underline">العودة للرئيسية</a></div>
+            </div>
+        </body>
