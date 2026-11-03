@@ -9,13 +9,17 @@ app.secret_key = os.environ.get("SECRET_KEY", "dar_daqiche_secret_key_2026")
 SUPABASE_URL = os.environ.get("SUPABASE_URL", "").strip()
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY", "").strip()
 
-# حماية التطبيق من الانهيار إذا كانت المتغيرات فارغة مؤقتاً أثناء الإقلاع
+# حماية التطبيق من الانهيار إذا كانت المتغيرات فارغة أو المفتاح غير صالح أثناء الإقلاع
 if not SUPABASE_URL or not SUPABASE_URL.startswith("http"):
     print("⚠️ تحذير: SUPABASE_URL غير مضبوط بشكل صحيح في البيئة، يتم استخدام رابط مؤقت لتفادي التوقف.")
     SUPABASE_URL = "https://placeholder.supabase.co"
     SUPABASE_KEY = "placeholder_key"
 
-supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+try:
+    supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+except Exception as e:
+    print(f"⚠️ تحذير: حدث خطأ أثناء تهيئة عميل Supabase: {e}")
+    supabase = None
 
 # كلمات المرور
 ADMIN_PASSWORD = "admin_secure_2026"
@@ -28,6 +32,10 @@ def home():
 # --- بوابة التلميذ (إدخال الكود أو الدخول بالاسم والهاتف) ---
 @app.route('/student-login', methods=['POST'])
 def student_login():
+    if not supabase:
+        flash("عذراً، الاتصال بقاعدة البيانات غير متوفر حالياً.", "danger")
+        return redirect(url_for('home'))
+
     action = request.form.get('action')
     full_name = request.form.get('full_name')
     phone = request.form.get('phone')
@@ -72,6 +80,10 @@ def student_dashboard():
     if 'student_name' not in session:
         return redirect(url_for('home'))
 
+    if not supabase:
+        flash("عذراً، الاتصال بقاعدة البيانات غير متوفر حالياً.", "danger")
+        return redirect(url_for('home'))
+
     student_name = session['student_name']
     
     # جلب جميع اشتراكات وباقات التلميذ الفعالة
@@ -101,6 +113,10 @@ def teacher_login():
 def teacher_dashboard():
     if not session.get('is_teacher'):
         return redirect(url_for('teacher_login'))
+
+    if not supabase:
+        flash("عذراً، الاتصال بقاعدة البيانات غير متوفر حالياً.", "danger")
+        return render_template('teacher_dashboard.html', lessons=[])
 
     if request.method == 'POST':
         school_year = request.form.get('school_year')
@@ -136,6 +152,10 @@ def admin_panel():
 
     if not session.get('is_admin'):
         return render_template('admin_login.html')
+
+    if not supabase:
+        flash("عذراً، الاتصال بقاعدة البيانات غير متوفر حالياً.", "danger")
+        return render_template('admin_panel.html', codes=[])
 
     if request.method == 'POST' and 'generate_code' in request.form:
         import random, string
