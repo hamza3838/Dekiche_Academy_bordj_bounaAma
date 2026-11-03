@@ -5,13 +5,15 @@ import os
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "dar_daqiche_secret_key_2026")
 
-# --- بيانات الاتصال بقاعدة بيانات Supabase مباشرة وثابتة ---
-SUPABASE_URL = "https://dobbzqbdlpzfqsewcjoz.supabase.co".strip()
-SUPABASE_KEY = "sb_publishable_eKgLBVGVdl_sHr473DZOFg_Pti54xCy".strip()
+# --- بيانات الاتصال الرسمية والصحيحة لقاعدة بيانات Supabase ---
+SUPABASE_URL = "https://dobbzqbdlpzfqsewcjoz.supabase.co"
+SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRvYmJ6cWJkbHB6ZnFzZXdjam96Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM1NjQyMDUsImV4cCI6MjEwOTE0MDIwNX0.Rz_4hNCixS9-FjiAs54Xu0xu0qhhteNly3SVgpHn7tw"
 
 try:
     supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+    print("✅ تم الاتصال بقاعدة البيانات بنجاح!")
 except Exception as e:
+    print(f"❌ خطأ في الاتصال: {e}")
     supabase = None
 
 ADMIN_PASSWORD = "admin_secure_2026"
@@ -38,7 +40,7 @@ def student_login():
             session['phone'] = phone
             return redirect(url_for('student_dashboard'))
         else:
-            flash("البيانات غير صحيحة أو لم تقم بتفعيل كود من قبل.", "danger")
+            flash("البيانات غير صحيحة أو لم تقم تفعيل كود من قبل.", "danger")
             return redirect(url_for('home'))
 
     elif action == 'redeem':
