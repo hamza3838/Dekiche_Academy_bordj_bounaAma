@@ -74,14 +74,26 @@ def student_dashboard():
         return redirect(url_for('home'))
 
     student_name = session['student_name']
-    subs_res = supabase.table('access_codes').select('*').eq('student_name', student_name).execute()
-    subscriptions = subs_res.data
+    
+    try:
+        subs_res = supabase.table('access_codes').select('*').eq('student_name', student_name).execute()
+        subscriptions = subs_res.data if subs_res and subs_res.data else []
 
-    lessons = []
-    if subscriptions:
-        for sub in subscriptions:
-            l_res = supabase.table('lessons').select('*').eq('school_year', sub.get('grade')).eq('subject', sub.get('subject')).eq('month', sub.get('month')).execute()
-            lessons.extend(l_res.data)
+        lessons = []
+        if subscriptions:
+            for sub in subscriptions:
+                g_val = sub.get('grade') or sub.get('school_year')
+                sub_val = sub.get('subject')
+                # دعم الحقلين معا (month أو code_month) لمنع أي خطأ داخلي
+                m_val = sub.get('month') or sub.get('code_month')
+                
+                if g_val and sub_val and m_val:
+                    l_res = supabase.table('lessons').select('*').eq('school_year', g_val).eq('subject', sub_val).eq('month', str(m_val)).execute()
+                    if l_res and l_res.data:
+                        lessons.extend(l_res.data)
+    except Exception as e:
+        flash(f"حدث خطأ أثناء جلب الدروس: {e}", "danger")
+        lessons = []
 
     return render_template('student_dashboard.html', student_name=student_name, subscriptions=subscriptions, lessons=lessons)
 
