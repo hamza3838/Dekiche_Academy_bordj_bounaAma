@@ -1,0 +1,80 @@
+:root {
+    --primary-color: #4A154B; /* البنفسجي الخاص بالشعار */
+    --secondary-color: #6C2278;
+    --accent-color: #F4F0F6;
+    --text-color: #333333;
+}
+
+body {
+    font-family: 'Cairo', Tahoma, sans-serif;
+    background-color: #f8f9fa;
+    color: var(--text-color);
+    direction: rtl;
+    text-align: right;
+    margin: 0;
+    padding: 0;
+}
+
+.navbar {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 15px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.navbar h1 {
+    margin: 0;
+    font-size: 22px;
+}
+
+.container {
+    max-width: 1000px;
+    margin: 40px auto;
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.btn-primary:hover {
+    background-color: var(--secondary-color);
+}
+
+input, select {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0 20px 0;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    box-sizing: border-box;
+}
+
+.alert {
+    padding: 12px;
+    margin-bottom: 20px;
+    border-radius: 6px;
+}
+.alert-danger { background-color: #f8d7da; color: #721c24; }
+.alert-success { background-color: #d4edda; color: #155724; }
+
+.card {
+    background: var(--accent-color);
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    border-right: 5px solid var(--primary-color);
+}
