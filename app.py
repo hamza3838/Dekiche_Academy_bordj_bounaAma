@@ -254,8 +254,11 @@ def admin_panel():
         future_date = (datetime.datetime.now() + datetime.timedelta(days=365)).strftime('%Y-%m-%d %H:%M:%S')
 
         try:
+            # حروف وأرقام فقط بدون شرطات أو رموز لتسهيل كتابتها على التلاميذ
+            characters = string.ascii_uppercase + string.digits
+            
             for _ in range(count):
-                random_code = "DAQ-" + ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+                random_code = ''.join(random.choices(characters, k=8))
                 supabase.table('access_codes').insert({
                     'code': random_code,
                     'grade': school_year,
@@ -267,7 +270,7 @@ def admin_panel():
                     'expires_at': future_date
                 }).execute()
             
-            flash(f"تم توليد {count} كود بنجاح!", "success")
+            flash(f"تم توليد {count} كود بنجاح (أرقام وحروف فقط)!", "success")
         except Exception as e:
             flash(f"خطأ أثناء حفظ الأكواد: {e}", "danger")
 
