@@ -22,7 +22,7 @@
         .alert-success { background: rgba(34, 197, 94, 0.15); border: 1px solid #22c55e; color: #86efac; }
         .alert-danger { background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; color: #fca5a5; }
 
-        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 16px; }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 16px; }
         .form-group label { display: block; font-size: 13px; color: #94a3b8; margin-bottom: 6px; font-weight: 600; }
         .form-group select, .form-group input { width: 100%; padding: 12px; background: #0f172a; border: 1px solid #334155; color: #f8fafc; border-radius: 10px; font-size: 14px; outline: none; transition: 0.2s; }
         .form-group select:focus, .form-group input:focus { border-color: #e9bd68; }
@@ -59,24 +59,24 @@
             <h2>إضافة درس جديد</h2>
             <form method="POST">
                 <div class="form-grid">
+                    <!-- اختيار الطور أولاً -->
                     <div class="form-group">
-                        <label>السن الدراسي:</label>
-                        <select name="school_year" required>
-                            <optgroup label="الطور الابتدائي">
-                                <option value="السنة الأولى ابتدائي">السنة الأولى ابتدائي</option>
-                                <option value="السنة الثانية ابتدائي">السنة الثانية ابتدائي</option>
-                                <option value="السنة الثالثة ابتدائي">السنة الثالثة ابتدائي</option>
-                                <option value="السنة الرابعة ابتدائي">السنة الرابعة ابتدائي</option>
-                                <option value="السنة الخامسة ابتدائي">السنة الخامسة ابتدائي</option>
-                            </optgroup>
-                            <optgroup label="الطور المتوسط">
-                                <option value="السنة الأولى متوسط">السنة الأولى متوسط</option>
-                                <option value="السنة الثانية متوسط">السنة الثانية متوسط</option>
-                                <option value="السنة الثالثة متوسط">السنة الثالثة متوسط</option>
-                                <option value="السنة الرابعة متوسط">السنة الرابعة متوسط</option>
-                            </optgroup>
+                        <label>الطور التعليمي:</label>
+                        <select id="cycleSelect" onchange="updateGrades()" required>
+                            <option value="">اختر الطور...</option>
+                            <option value="الابتدائي">التعليم الابتدائي</option>
+                            <option value="المتوسط">التعليم المتوسط</option>
                         </select>
                     </div>
+
+                    <!-- اختيار السن الدراسي بناءً على الطور -->
+                    <div class="form-group">
+                        <label>السن الدراسي:</label>
+                        <select name="school_year" id="gradeSelect" required>
+                            <option value="">اختر الطور أولاً...</option>
+                        </select>
+                    </div>
+
                     <div class="form-group">
                         <label>المادة:</label>
                         <select name="subject" required>
@@ -129,67 +129,4 @@
                 <div class="form-grid">
                     <div class="form-group">
                         <label>رابط الفيديو (Video URL):</label>
-                        <input type="url" name="video_url" placeholder="https://..." required>
-                    </div>
-                    <div class="form-group">
-                        <label>رابط ملف PDF (اختياري):</label>
-                        <input type="url" name="pdf_url" placeholder="اتركه فارغاً إن لم يوجد ملف">
-                    </div>
-                </div>
-
-                <button type="submit" class="btn-submit">حفظ وإضافة الدرس</button>
-            </form>
-        </div>
-
-        <div class="card">
-            <h2>الدروس المضافة مسبقاً</h2>
-            <div class="table-responsive">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>الترتيب</th>
-                            <th>السنة</th>
-                            <th>المادة</th>
-                            <th>الشهر / الأسبوع</th>
-                            <th>عنوان الدرس</th>
-                            <th>الفيديو</th>
-                            <th>الملف</th>
-                            <th>الإجراء</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% if lessons %}
-                            {% for l in lessons %}
-                            <tr>
-                                <td style="color: #e9bd68; font-weight: bold;">{{ l.lesson_order or 0 }}</td>
-                                <td>{{ l.school_year }}</td>
-                                <td>{{ l.subject }}</td>
-                                <td>{{ l.month }} - {{ l.week }}</td>
-                                <td style="font-weight: 600; color: #e9bd68;">{{ l.title }}</td>
-                                <td><a href="{{ l.video_url }}" target="_blank" class="link-val">رابط الفيديو</a></td>
-                                <td>
-                                    {% if l.pdf_url %}
-                                        <a href="{{ l.pdf_url }}" target="_blank" class="link-val">ملف PDF</a>
-                                    {% else %}
-                                        <span style="color: #94a3b8;">لا يوجد</span>
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    <form action="{{ url_for('delete_lesson', lesson_id=l.id) }}" method="POST" onsubmit="return confirm('هل أنت متأكد من حذف هذا الدرس؟');" style="display:inline;">
-                                        <button type="submit" class="btn-delete">حذف</button>
-                                    </form>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        {% else %}
-                            <tr>
-                                <td colspan="8" class="empty-row">لا توجد دروس مضافة حتى الآن</td>
-                            </tr>
-                        {% endif %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-</body>
-</html>
+                        <input type="url
