@@ -40,14 +40,14 @@
         .lesson-item { background: #1e293b; border: 1px solid rgba(124, 58, 237, 0.3); border-radius: 16px; padding: 15px; margin-bottom: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
         .lesson-meta { font-size: 12px; background: #7c3aed; color: white; padding: 4px 10px; border-radius: 6px; display: inline-block; font-weight: 600; margin-bottom: 10px; }
         
-        /* رأس عنوان الدرس مع تنبيه قلب الهاتف الجانبي */
+        /* صف العنوان مع التنبيه الجانبي لقلب الهاتف */
         .lesson-header-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; }
         .lesson-title { font-size: 17px; color: #f8fafc; font-weight: 700; }
         
-        /* تنسيق عبارة قلب الهاتف الجانبية غير المزعجة */
+        /* تنسيق عبارة قلب الهاتف الجانبية */
         .rotate-tip { background: rgba(233, 189, 104, 0.1); border: 1px solid rgba(233, 189, 104, 0.3); color: #e9bd68; padding: 5px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; }
 
-        /* صندوق مشغل الفيديو ليأخذ كامل العرض بدقة */
+        /* صندوق مشغل الفيديو */
         .lesson-player-box {
             background: #0f172a;
             border: 1px solid #7c3aed;
@@ -57,7 +57,7 @@
             margin: 10px 0;
         }
 
-        /* حاوية الفيديو المطورة لتملأ عرض الشاشة بالكامل */
+        /* حاوية الفيديو مع تفعيل الطبقات الحامية بدقة */
         .video-container {
             position: relative;
             width: 100%;
@@ -75,29 +75,29 @@
             border: 0;
         }
         
-        /* طبقة حماية الزاوية اليمنى السفلية (شعار يوتيوب) */
+        /* طبقة حماية الزاوية اليمنى السفلية (شعار يوتيوب) - تم تعزيز الطبقة وزيادة الـ z-index */
         .video-container::after {
             content: "";
             position: absolute;
             bottom: 0;
             right: 0;
-            width: 140px;
-            height: 45px;
+            width: 150px;
+            height: 55px;
             background: transparent;
-            z-index: 9999;
+            z-index: 2147483647;
             pointer-events: auto;
         }
 
-        /* طبقة حماية الزاوية اليسرى السفلية (زر المشاركة) */
+        /* طبقة حماية الزاوية اليسرى السفلية (زر المشاركة) - تم تعزيز الطبقة وزيادة الـ z-index */
         .video-container::before {
             content: "";
             position: absolute;
             bottom: 0;
             left: 0;
-            width: 140px;
-            height: 45px;
+            width: 150px;
+            height: 55px;
             background: transparent;
-            z-index: 9999;
+            z-index: 2147483647;
             pointer-events: auto;
         }
 
@@ -175,7 +175,7 @@
                                     {% set embed_url = v_url %}
                                 {% endif %}
 
-                                <!-- مشغل فيديو يملأ العرض بالكامل ومحمى بالكامل -->
+                                <!-- مشغل فيديو يملأ العرض بالكامل مع الطبقات الشفافة المحمية -->
                                 <div class="video-container">
                                     <iframe src="{{ embed_url }}?rel=0&modestbranding=1&controls=1&showinfo=0&iv_load_policy=3&disablekb=1&fs=0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
                                 </div>
