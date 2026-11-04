@@ -7,17 +7,17 @@
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; }
-        body { background: #0f172a; color: #f8fafc; min-height: 100vh; padding: 20px; direction: rtl; }
+        body { background: #0f172a; color: #f8fafc; min-height: 100vh; padding: 15px; direction: rtl; }
         .wrapper { max-width: 1000px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px; }
         
         /* شريط التنقل العلوي */
-        .top-bar { background: #1e293b; border: 1px solid rgba(233, 189, 104, 0.2); border-radius: 16px; padding: 20px 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 20px rgba(0,0,0,0.3); flex-wrap: wrap; gap: 15px; }
-        .top-bar h1 { color: #e9bd68; font-size: 20px; font-weight: 700; }
+        .top-bar { background: #1e293b; border: 1px solid rgba(233, 189, 104, 0.2); border-radius: 16px; padding: 20px 25px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 20px rgba(0,0,0,0.3); flex-wrap: wrap; gap: 15px; }
+        .top-bar h1 { color: #e9bd68; font-size: 18px; font-weight: 700; }
         .btn-logout { background: #ef4444; color: white; padding: 8px 18px; border-radius: 10px; text-decoration: none; font-weight: 600; font-size: 14px; transition: 0.2s; }
         .btn-logout:hover { background: #dc2626; }
 
         /* البطاقات العامة */
-        .card { background: #1e293b; border: 1px solid rgba(233, 189, 104, 0.2); border-radius: 16px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+        .card { background: #1e293b; border: 1px solid rgba(233, 189, 104, 0.2); border-radius: 16px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
         .card h2, .card h3 { color: #e9bd68; font-size: 18px; margin-bottom: 16px; font-weight: 600; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; }
 
         /* التنبيهات */
@@ -26,7 +26,6 @@
         .alert-danger { background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; color: #fca5a5; }
 
         /* صندوق تفعيل كود شهر جديد */
-        .redeem-box { background: #1e293b; border: 1px solid rgba(233, 189, 104, 0.3); border-radius: 16px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); margin-bottom: 5px; }
         .redeem-form { display: flex; gap: 10px; flex-wrap: wrap; }
         .redeem-form input { flex: 1; min-width: 250px; padding: 12px; background: #0f172a; border: 1px solid #334155; color: #f8fafc; border-radius: 10px; font-size: 14px; outline: none; transition: 0.2s; }
         .redeem-form input:focus { border-color: #e9bd68; }
@@ -37,30 +36,36 @@
         .subscriptions-container { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
         .sub-badge { background: rgba(233, 189, 104, 0.15); border: 1px solid rgba(233, 189, 104, 0.3); padding: 8px 14px; border-radius: 10px; font-weight: 600; color: #e9bd68; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; }
 
-        /* مشغل الفيديو والحماية */
-        .lesson-item { background: #1e293b; border: 1px solid rgba(124, 58, 237, 0.3); border-radius: 16px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+        /* بطاقة الدرس */
+        .lesson-item { background: #1e293b; border: 1px solid rgba(124, 58, 237, 0.3); border-radius: 16px; padding: 15px; margin-bottom: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
         .lesson-meta { font-size: 12px; background: #7c3aed; color: white; padding: 4px 10px; border-radius: 6px; display: inline-block; font-weight: 600; margin-bottom: 10px; }
-        .lesson-title { font-size: 18px; color: #f8fafc; margin-bottom: 15px; font-weight: 700; }
+        
+        /* رأس عنوان الدرس مع تنبيه قلب الهاتف الجانبي */
+        .lesson-header-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; }
+        .lesson-title { font-size: 17px; color: #f8fafc; font-weight: 700; }
+        
+        /* تنسيق عبارة قلب الهاتف الجانبية غير المزعجة */
+        .rotate-tip { background: rgba(233, 189, 104, 0.1); border: 1px solid rgba(233, 189, 104, 0.3); color: #e9bd68; padding: 5px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; }
 
+        /* صندوق مشغل الفيديو ليأخذ كامل العرض بدقة */
+        .lesson-player-box {
+            background: #0f172a;
+            border: 1px solid #7c3aed;
+            padding: 0;
+            border-radius: 12px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        /* حاوية الفيديو المطورة لتملأ عرض الشاشة بالكامل */
         .video-container {
             position: relative;
             width: 100%;
-            padding-bottom: 56.25%; /* نسبة الأبعاد الأساسية 16:9 */
+            padding-bottom: 56.25%; /* نسبة الأبعاد 16:9 القياسية */
             height: 0;
-            overflow: hidden;
-            border-radius: 12px;
             background: #000;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-            margin-bottom: 15px;
         }
-
-        /* تحسين وتكبير عرض الفيديو على الهواتف الذكية */
-        @media (max-width: 768px) {
-            .video-container {
-                padding-bottom: 65%; /* زيادة الارتفاع قليلاً ليملأ الشاشة بوضوح على الجوال */
-            }
-        }
-
+        
         .video-container iframe {
             position: absolute;
             top: 0;
@@ -76,8 +81,8 @@
             position: absolute;
             bottom: 0;
             right: 0;
-            width: 180px;
-            height: 50px;
+            width: 140px;
+            height: 45px;
             background: transparent;
             z-index: 9999;
             pointer-events: auto;
@@ -89,15 +94,15 @@
             position: absolute;
             bottom: 0;
             left: 0;
-            width: 180px;
-            height: 50px;
+            width: 140px;
+            height: 45px;
             background: transparent;
             z-index: 9999;
             pointer-events: auto;
         }
 
         /* زر تحميل ملف PDF */
-        .pdf-btn { display: inline-flex; align-items: center; gap: 8px; color: #38bdf8; text-decoration: none; font-weight: 600; font-size: 14px; background: rgba(56, 189, 248, 0.1); padding: 10px 16px; border-radius: 10px; border: 1px solid rgba(56, 189, 248, 0.2); transition: 0.2s; }
+        .pdf-btn { display: inline-flex; align-items: center; gap: 8px; color: #38bdf8; text-decoration: none; font-weight: 600; font-size: 14px; background: rgba(56, 189, 248, 0.1); padding: 10px 16px; border-radius: 10px; border: 1px solid rgba(56, 189, 248, 0.2); transition: 0.2s; margin-top: 10px; }
         .pdf-btn:hover { background: rgba(56, 189, 248, 0.2); }
 
         .empty-lessons { text-align: center; color: #94a3b8; padding: 40px; font-size: 15px; }
@@ -152,7 +157,12 @@
                 {% for lesson in lessons %}
                     <div class="lesson-item">
                         <span class="lesson-meta">{{ lesson.school_year }} | {{ lesson.subject }} | {{ lesson.month }} | {{ lesson.week }}</span>
-                        <h4 class="lesson-title">{{ lesson.title }}</h4>
+                        
+                        <!-- صف العنوان مع التنبيه الجانبي لقلب الهاتف -->
+                        <div class="lesson-header-row">
+                            <h4 class="lesson-title">{{ lesson.title }}</h4>
+                            <span class="rotate-tip">📱 اقلب هاتفك أفقياً لمشاهدة أفضل</span>
+                        </div>
                         
                         {% if lesson.video_url %}
                             <div class="lesson-player-box">
@@ -165,7 +175,7 @@
                                     {% set embed_url = v_url %}
                                 {% endif %}
 
-                                <!-- مشغل فيديو آمن ومحسن للهواتف -->
+                                <!-- مشغل فيديو يملأ العرض بالكامل ومحمى بالكامل -->
                                 <div class="video-container">
                                     <iframe src="{{ embed_url }}?rel=0&modestbranding=1&controls=1&showinfo=0&iv_load_policy=3&disablekb=1&fs=0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
                                 </div>
@@ -173,7 +183,7 @@
                         {% endif %}
 
                         {% if lesson.pdf_url %}
-                            <div style="margin-top: 15px;">
+                            <div>
                                 <a href="{{ lesson.pdf_url }}" target="_blank" class="pdf-btn">📄 تحميل ملف الدرس (PDF)</a>
                             </div>
                         {% endif %}
