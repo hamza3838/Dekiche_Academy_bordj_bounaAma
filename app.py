@@ -4,6 +4,7 @@ import os
 import datetime
 import random
 import string
+import re
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "dar_daqiche_secret_key_2026")
@@ -22,6 +23,12 @@ except Exception as e:
 ADMIN_PASSWORD = "admin_secure_2026"
 TEACHER_PASSWORD = "teacher_password_2026"
 
+# --- دالة التحقق من صحة رقم الهاتف الجزائري (10 أرقام وتبدأ بـ 05, 06, 07) ---
+def is_valid_phone(phone):
+    if not phone:
+        return False
+    return bool(re.match(r'^0[567]\d{8}$', phone))
+
 @app.route('/')
 def home():
     return render_template('index.html')
@@ -34,7 +41,12 @@ def student_login():
 
     action = request.form.get('action')
     full_name = request.form.get('full_name')
-    phone = request.form.get('phone')
+    phone = request.form.get('phone', '').strip()
+
+    # التحقق من صحة رقم الهاتف قبل متابعة أي عملية
+    if not is_valid_phone(phone):
+        flash("رقم الهاتف غير صحيح! يجب أن يتكون من 10 أرقام ويبدأ بـ 05، 06 أو 07 دون حروف أو رموز.", "danger")
+        return redirect(url_for('home'))
 
     if action == 'login':
         res = supabase.table('access_codes').select('*').eq('phone', phone).eq('student_name', full_name).execute()
