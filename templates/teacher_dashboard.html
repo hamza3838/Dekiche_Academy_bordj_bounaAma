@@ -69,14 +69,12 @@
                     gradeSelect.appendChild(opt);
                 });
 
-                // مواد الابتدائي
+                // مواد الابتدائي (اللغة العربية، الرياضيات، الفرنسية، الإنجليزية فقط)
                 const primarySubjects = [
                     "اللغة العربية",
                     "الرياضيات",
                     "الفرنسية",
-                    "الإنجليزية",
-                    "التربية الإسلامية",
-                    "التربية العلمية"
+                    "الإنجليزية"
                 ];
                 primarySubjects.forEach(subject => {
                     let opt = document.createElement('option');
