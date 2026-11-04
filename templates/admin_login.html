@@ -2,25 +2,67 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>تسجيل دخول المشرف - أكاديمية دقيش</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@3.4.17/dist/tailwind.min.css">
-    <style>body { font-family: Tahoma, sans-serif; background: #101e2a; color: #f7f3ea; }</style>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; }
+        body { background: #0f172a; color: #f8fafc; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; direction: rtl; }
+        .login-card { background: #1e293b; border: 1px solid rgba(233, 189, 104, 0.3); border-radius: 20px; padding: 35px; width: 100%; max-width: 420px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); text-align: center; }
+        .login-card h2 { color: #e9bd68; font-size: 22px; font-weight: 700; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 12px; }
+        .alert { padding: 12px 16px; border-radius: 10px; margin-bottom: 20px; font-size: 13px; font-weight: 600; background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; color: #fca5a5; text-align: right; }
+        .form-group { margin-bottom: 18px; text-align: right; }
+        .form-group label { display: block; font-size: 13px; color: #94a3b8; margin-bottom: 6px; font-weight: 600; }
+        .form-group input { width: 100%; padding: 14px; background: #0f172a; border: 1px solid #334155; color: #f8fafc; border-radius: 12px; font-size: 14px; outline: none; transition: 0.2s; }
+        .form-group input:focus { border-color: #e9bd68; }
+        .btn-submit { background: #e9bd68; color: #0f172a; padding: 14px; border: none; border-radius: 12px; font-weight: 700; font-size: 15px; cursor: pointer; width: 100%; transition: 0.2s; margin-top: 5px; }
+        .btn-submit:hover { filter: brightness(1.1); }
+        .back-link { margin-top: 20px; display: inline-block; color: #94a3b8; font-size: 14px; text-decoration: none; transition: 0.2s; }
+        .back-link:hover { color: #e9bd68; text-decoration: underline; }
+    </style>
 </head>
-<body class="flex items-center justify-center min-h-screen">
-    <div class="bg-[#192b39] p-8 rounded-2xl border border-[#e9bd68]/30 max-w-md w-full shadow-2xl text-center">
-        <h2 class="text-2xl font-bold mb-6 text-[#e9bd68]">لوحة تحكم المشرف</h2>
+<body>
+    <div class="login-card">
+        <h2>لوحة تحكم المشرف</h2>
+
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for cat, msg in messages %}
-                    <div class="mb-4 p-3 rounded-xl bg-red-900/50 border border-red-500 text-red-200 text-sm">{{ msg }}</div>
+                    <div class="alert">{{ msg }}</div>
                 {% endfor %}
             {% endif %}
         {% endwith %}
-        <form method="POST" class="space-y-4">
-            <input type="password" name="password" placeholder="أدخل كلمة مرور المشرف" required class="w-full p-3 rounded-xl bg-[#101e2a] border border-[#617586] text-white outline-none focus:border-[#e9bd68]">
-            <button type="submit" class="w-full py-3 bg-[#e9bd68] text-[#101e2a] font-bold rounded-xl hover:brightness-110 transition">دخول</button>
+
+        <form method="POST">
+            <div class="form-group">
+                <label>كلمة مرور المشرف:</label>
+                <input type="password" name="password" placeholder="أدخل كلمة المرور" required>
+            </div>
+            <button type="submit" class="btn-submit">دخول للمنصة</button>
         </form>
-        <div class="mt-4"><a href="/" class="text-sm text-[#b8c7d0] hover:underline">العودة للرئيسية</a></div>
+
+        <a href="/" class="back-link">العودة للرئيسية</a>
     </div>
+
+    <!-- كود لحفظ واسترجاع كلمة المرور تلقائياً في المتصفح -->
+    <script>
+    window.addEventListener('DOMContentLoaded', () => {
+        const savedAdminPass = localStorage.getItem('daqiche_admin_password');
+        if (savedAdminPass) {
+            const passInput = document.querySelector('input[name="password"]');
+            if (passInput) passInput.value = savedAdminPass;
+        }
+    });
+
+    const adminForm = document.querySelector('form');
+    if (adminForm) {
+        adminForm.addEventListener('submit', () => {
+            const passInput = document.querySelector('input[name="password"]');
+            if (passInput && passInput.value.trim()) {
+                localStorage.setItem('daqiche_admin_password', passInput.value.trim());
+            }
+        });
+    }
+    </script>
 </body>
 </html>
