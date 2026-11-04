@@ -41,17 +41,20 @@
     </style>
 
     <script>
-        // ربط الدور بالسنوات الدراسية الخاصة به ديناميكياً
-        function updateGrades() {
+        // ربط الطور بكل من السنوات الدراسية والمواد الخاصة به ديناميكياً
+        function updateCycleData() {
             const cycleSelect = document.getElementById('cycleSelect');
             const gradeSelect = document.getElementById('gradeSelect');
+            const subjectSelect = document.getElementById('subjectSelect');
             
             const selectedCycle = cycleSelect.value;
             
-            // تفريغ القائمة الحالية
+            // تفريغ القوائم الحالية
             gradeSelect.innerHTML = '<option value="">اختر السنة الدراسية...</option>';
+            subjectSelect.innerHTML = '<option value="">اختر المادة...</option>';
             
             if (selectedCycle === 'الابتدائي') {
+                // سنوات الابتدائي
                 const primaryGrades = [
                     "السنة الأولى ابتدائي",
                     "السنة الثانية ابتدائي",
@@ -65,7 +68,25 @@
                     opt.textContent = grade;
                     gradeSelect.appendChild(opt);
                 });
+
+                // مواد الابتدائي
+                const primarySubjects = [
+                    "اللغة العربية",
+                    "الرياضيات",
+                    "الفرنسية",
+                    "الإنجليزية",
+                    "التربية الإسلامية",
+                    "التربية العلمية"
+                ];
+                primarySubjects.forEach(subject => {
+                    let opt = document.createElement('option');
+                    opt.value = subject;
+                    opt.textContent = subject;
+                    subjectSelect.appendChild(opt);
+                });
+
             } else if (selectedCycle === 'المتوسط') {
+                // سنوات المتوسط
                 const middleGrades = [
                     "السنة الأولى متوسط",
                     "السنة الثانية متوسط",
@@ -77,6 +98,24 @@
                     opt.value = grade;
                     opt.textContent = grade;
                     gradeSelect.appendChild(opt);
+                });
+
+                // مواد المتوسط
+                const middleSubjects = [
+                    "اللغة العربية",
+                    "الرياضيات",
+                    "الفرنسية",
+                    "الإنجليزية",
+                    "الفيزياء (العلوم الفيزيائية)",
+                    "العلوم الطبيعية",
+                    "الاجتماعيات",
+                    "التربية الإسلامية"
+                ];
+                middleSubjects.forEach(subject => {
+                    let opt = document.createElement('option');
+                    opt.value = subject;
+                    opt.textContent = subject;
+                    subjectSelect.appendChild(opt);
                 });
             }
         }
@@ -101,10 +140,10 @@
             <h2>إضافة درس جديد</h2>
             <form method="POST">
                 <div class="form-grid">
-                    <!-- اختيار الطور أولاً -->
+                    <!-- اختيار الطور أولاً (سيقوم بتحديث السنوات والمواد معاً تلقائياً) -->
                     <div class="form-group">
                         <label>الطور التعليمي:</label>
-                        <select id="cycleSelect" onchange="updateGrades()" required>
+                        <select id="cycleSelect" onchange="updateCycleData()" required>
                             <option value="">اختر الطور...</option>
                             <option value="الابتدائي">التعليم الابتدائي</option>
                             <option value="المتوسط">التعليم المتوسط</option>
@@ -119,19 +158,14 @@
                         </select>
                     </div>
 
+                    <!-- اختيار المادة بناءً على الطور -->
                     <div class="form-group">
                         <label>المادة:</label>
-                        <select name="subject" required>
-                            <option value="اللغة العربية">اللغة العربية</option>
-                            <option value="الرياضيات">الرياضيات</option>
-                            <option value="الفرنسية">الفرنسية</option>
-                            <option value="الإنجليزية">الإنجليزية</option>
-                            <option value="الفيزياء">الفيزياء (العلوم الفيزيائية)</option>
-                            <option value="العلوم الطبيعية">العلوم الطبيعية</option>
-                            <option value="الاجتماعيات">الاجتماعيات</option>
-                            <option value="التربية الإسلامية">التربية الإسلامية</option>
+                        <select name="subject" id="subjectSelect" required>
+                            <option value="">اختر الطور أولاً...</option>
                         </select>
                     </div>
+
                     <div class="form-group">
                         <label>الشهر:</label>
                         <select name="month" required>
