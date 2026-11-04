@@ -39,6 +39,48 @@
         .btn-delete { background: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px; transition: 0.2s; }
         .btn-delete:hover { background: #dc2626; }
     </style>
+
+    <script>
+        // ربط الدور بالسنوات الدراسية الخاصة به ديناميكياً
+        function updateGrades() {
+            const cycleSelect = document.getElementById('cycleSelect');
+            const gradeSelect = document.getElementById('gradeSelect');
+            
+            const selectedCycle = cycleSelect.value;
+            
+            // تفريغ القائمة الحالية
+            gradeSelect.innerHTML = '<option value="">اختر السنة الدراسية...</option>';
+            
+            if (selectedCycle === 'الابتدائي') {
+                const primaryGrades = [
+                    "السنة الأولى ابتدائي",
+                    "السنة الثانية ابتدائي",
+                    "السنة الثالثة ابتدائي",
+                    "السنة الرابعة ابتدائي",
+                    "السنة الخامسة ابتدائي"
+                ];
+                primaryGrades.forEach(grade => {
+                    let opt = document.createElement('option');
+                    opt.value = grade;
+                    opt.textContent = grade;
+                    gradeSelect.appendChild(opt);
+                });
+            } else if (selectedCycle === 'المتوسط') {
+                const middleGrades = [
+                    "السنة الأولى متوسط",
+                    "السنة الثانية متوسط",
+                    "السنة الثالثة متوسط",
+                    "السنة الرابعة متوسط"
+                ];
+                middleGrades.forEach(grade => {
+                    let opt = document.createElement('option');
+                    opt.value = grade;
+                    opt.textContent = grade;
+                    gradeSelect.appendChild(opt);
+                });
+            }
+        }
+    </script>
 </head>
 <body>
     <div class="wrapper">
@@ -69,7 +111,7 @@
                         </select>
                     </div>
 
-                    <!-- اختيار السن الدراسي بناءً على الطور -->
+                    <!-- اختيار السنة الدراسية بناءً على الطور -->
                     <div class="form-group">
                         <label>السن الدراسي:</label>
                         <select name="school_year" id="gradeSelect" required>
@@ -129,4 +171,74 @@
                 <div class="form-grid">
                     <div class="form-group">
                         <label>رابط الفيديو (Video URL):</label>
-                        <input type="url
+                        <input type="url" name="video_url" placeholder="https://www.youtube.com/watch?v=..." required>
+                    </div>
+                    <div class="form-group">
+                        <label>رابط ملف الـ PDF (اختياري):</label>
+                        <input type="url" name="pdf_url" placeholder="https://...">
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-submit">نشر وحفظ الدرس 📚</button>
+            </form>
+        </div>
+
+        <!-- جدول عرض الدروس المضافة -->
+        <div class="card">
+            <h2>الدروس المسجلة في المنصة</h2>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>الترتيب</th>
+                            <th>السنة الدراسية</th>
+                            <th>المادة</th>
+                            <th>الشهر / الأسبوع</th>
+                            <th>عنوان الدرس</th>
+                            <th>رابط الفيديو</th>
+                            <th>الملف</th>
+                            <th>إجراء</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if lessons %}
+                            {% for lesson in lessons %}
+                                <tr>
+                                    <td>{{ lesson.lesson_order }}</td>
+                                    <td>{{ lesson.school_year }}</td>
+                                    <td>{{ lesson.subject }}</td>
+                                    <td>{{ lesson.month }} - {{ lesson.week }}</td>
+                                    <td>{{ lesson.title }}</td>
+                                    <td>
+                                        {% if lesson.video_url %}
+                                            <a href="{{ lesson.video_url }}" target="_blank" class="link-val">مشاهدة الرابط</a>
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if lesson.pdf_url %}
+                                            <a href="{{ lesson.pdf_url }}" target="_blank" class="link-val">ملف PDF</a>
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <form action="{{ url_for('delete_lesson', lesson_id=lesson.id) }}" method="POST" onsubmit="return confirm('هل أنت متأكد من حذف هذا الدرس؟');" style="display:inline;">
+                                            <button type="submit" class="btn-delete">حذف</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="8" class="empty-row">لا توجد دروس مضافة حالياً.</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
