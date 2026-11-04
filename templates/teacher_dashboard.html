@@ -36,6 +36,8 @@
         .empty-row { text-align: center; color: #94a3b8; padding: 30px; font-size: 14px; }
         a.link-val { color: #38bdf8; text-decoration: none; }
         a.link-val:hover { text-decoration: underline; }
+        .btn-delete { background: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px; transition: 0.2s; }
+        .btn-delete:hover { background: #dc2626; }
     </style>
 </head>
 <body>
@@ -101,10 +103,15 @@
                     </div>
                 </div>
 
-                <div class="form-grid" style="grid-template-columns: 1fr;">
+                <div class="form-grid" style="grid-template-columns: 2fr 1fr;">
                     <div class="form-group">
                         <label>عنوان الدرس:</label>
                         <input type="text" name="title" placeholder="مثال: درس جمع الاعداد الطبيعية" required>
+                    </div>
+                    <!-- حقل ترتيب الدرس الجديد -->
+                    <div class="form-group">
+                        <label>رقم الترتيب (الأولوية):</label>
+                        <input type="number" name="lesson_order" value="0" placeholder="0" required>
                     </div>
                 </div>
 
@@ -129,29 +136,38 @@
                 <table>
                     <thead>
                         <tr>
+                            <th>الترتيب</th>
                             <th>السنة</th>
                             <th>المادة</th>
                             <th>الشهر / الأسبوع</th>
                             <th>عنوان الدرس</th>
                             <th>الفيديو</th>
                             <th>الملف</th>
+                            <th>الإجراء</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% if lessons %}
                             {% for l in lessons %}
                             <tr>
+                                <td style="color: #e9bd68; font-weight: bold;">{{ l.lesson_order or 0 }}</td>
                                 <td>{{ l.school_year }}</td>
                                 <td>{{ l.subject }}</td>
                                 <td>{{ l.month }} - {{ l.week }}</td>
                                 <td style="font-weight: 600; color: #e9bd68;">{{ l.title }}</td>
                                 <td><a href="{{ l.video_url }}" target="_blank" class="link-val">رابط الفيديو</a></td>
                                 <td><a href="{{ l.pdf_url }}" target="_blank" class="link-val">ملف PDF</a></td>
+                                <td>
+                                    <!-- زر حذف الدرس -->
+                                    <form action="{{ url_for('delete_lesson', lesson_id=l.id) }}" method="POST" onsubmit="return confirm('هل أنت متأكد من حذف هذا الدرس؟');" style="display:inline;">
+                                        <button type="submit" class="btn-delete">حذف</button>
+                                    </form>
+                                </td>
                             </tr>
                             {% endfor %}
                         {% else %}
                             <tr>
-                                <td colspan="6" class="empty-row">لا توجد دروس مضافة حتى الآن</td>
+                                <td colspan="8" class="empty-row">لا توجد دروس مضافة حتى الآن</td>
                             </tr>
                         {% endif %}
                     </tbody>
