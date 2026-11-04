@@ -2,21 +2,95 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>أكاديمية دقيش التعليمية</title>
     <!-- تم ضبط مسار ملف التصميم ليتوافق مع مجلد static -->
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; font-family: 'Cairo', sans-serif; }
+        body { 
+            background: #0f172a; 
+            color: #f8fafc; 
+            min-height: 100vh; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: center; 
+            padding: 20px; 
+            direction: rtl; 
+            margin: 0;
+        }
+        .landing-card { 
+            width: 100%; 
+            max-width: 520px; 
+            background: #1e293b; 
+            border: 1px solid rgba(233, 189, 104, 0.25); 
+            border-radius: 20px; 
+            padding: 30px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
+            position: relative;
+            overflow: hidden;
+        }
+        .landing-card::before {
+            content: '';
+            position: absolute;
+            top: 0; right: 0; left: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #7c3aed, #e9bd68);
+        }
+        
+        .logo-box { text-align: center; margin-bottom: 15px; }
+        .logo-box img { max-width: 150px; height: auto; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.3)); }
+        
+        .title-area h2 { color: #e9bd68; font-size: 22px; font-weight: 700; text-align: center; margin-bottom: 5px; }
+        .title-area p { color: #94a3b8; font-size: 13px; text-align: center; margin-bottom: 25px; }
+
+        /* التنبيهات */
+        .alert { padding: 12px 16px; border-radius: 10px; margin-bottom: 20px; font-size: 13px; font-weight: 600; }
+        .alert-success { background: rgba(34, 197, 94, 0.15); border: 1px solid #22c55e; color: #86efac; }
+        .alert-danger { background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; color: #fca5a5; }
+
+        /* نظام التبويب الاحترافي */
+        .tabs-header { display: flex; gap: 10px; margin-bottom: 20px; background: #0f172a; padding: 6px; border-radius: 12px; }
+        .tab-btn { flex: 1; background: transparent; border: none; color: #94a3b8; padding: 10px; font-weight: 700; font-size: 13px; border-radius: 8px; cursor: pointer; transition: 0.2s; }
+        .tab-btn.active { background: #1e293b; color: #e9bd68; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+
+        .form-section { display: none; }
+        .form-section.active { display: block; animation: fadeIn 0.3s ease-in-out; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-group { margin-bottom: 15px; text-align: right; }
+        .form-group label { display: block; font-size: 13px; color: #cbd5e1; margin-bottom: 6px; font-weight: 600; }
+        .form-group input { width: 100%; padding: 12px 15px; background: #0f172a; border: 1px solid #334155; color: #f8fafc; border-radius: 10px; font-size: 14px; outline: none; transition: 0.2s; }
+        .form-group input:focus { border-color: #e9bd68; box-shadow: 0 0 0 3px rgba(233, 189, 104, 0.15); }
+
+        .btn-custom { width: 100%; background: #e9bd68; color: #0f172a; padding: 13px; border: none; border-radius: 10px; font-weight: 700; font-size: 15px; cursor: pointer; transition: 0.2s; margin-top: 5px; }
+        .btn-custom:hover { filter: brightness(1.1); transform: translateY(-1px); }
+        .btn-custom.purple { background: #6C2278; color: #fff; }
+
+        /* الفوتر والروابط السفلية */
+        .footer-links { margin-top: 25px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.08); display: flex; justify-content: space-between; font-size: 13px; }
+        .footer-links a { color: #94a3b8; text-decoration: none; transition: 0.2s; font-weight: 600; }
+        .footer-links a:hover { color: #e9bd68; }
+    </style>
 </head>
 <body>
-    <div class="container" style="max-width: 600px; margin-top: 60px; text-align: center;">
+    <div class="landing-card">
         
-        <!-- عرض شعار أكاديمية دقيش بالشكل الصحيح -->
-        <div style="text-align: center; margin-bottom: 20px;">
-            <img src="{{ url_for('static', filename='Logo.png') }}" alt="شعار أكاديمية دقيش التعليمية" style="max-width: 180px; height: auto;">
+        <!-- عرض شعار أكاديمية دقيش -->
+        <div class="logo-box">
+            <img src="{{ url_for('static', filename='Logo.png') }}" alt="شعار أكاديمية دقيش التعليمية">
         </div>
         
-        <h2 style="color: #4A154B; margin-bottom: 5px;">أكاديمية دقيش التعليمية</h2>
-        <p style="color: #666; margin-bottom: 30px;">منصتك التعليمية الموثوقة للنجاح والتفوق</p>
+        <div class="title-area">
+            <h2>أكاديمية دقيش التعليمية</h2>
+            <p>منصتك التعليمية الموثوقة للنجاح والتفوق</p>
+        </div>
 
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
@@ -26,64 +100,21 @@
             {% endif %}
         {% endwith %}
 
-        <div style="background: #fdfbfd; padding: 25px; border-radius: 10px; border: 1px solid #eee; text-align: right;">
-            <h3>تسجيل الدخول / تفعيل اشتراك جديد</h3>
+        <!-- أزرار التبويب بين التفعيل والدخول المباشر -->
+        <div class="tabs-header">
+            <button type="button" class="tab-btn active" onclick="switchTab('redeemTab', this)">🎟️ تفعيل كود جديد</button>
+            <button type="button" class="tab-btn" onclick="switchTab('loginTab', this)">🚀 دخول مباشر</button>
+        </div>
+
+        <!-- قسم تفعيل كود اشتراك جديد -->
+        <div id="redeemTab" class="form-section active">
             <form action="{{ url_for('student_login') }}" method="POST">
                 <input type="hidden" name="action" value="redeem">
-                <label>الاسم واللقب:</label>
-                <input type="text" name="full_name" required placeholder="مثال: محمد دقيش">
                 
-                <label>رقم الهاتف (10 أرقام يبدأ بـ 05, 06, أو 07):</label>
-                <input type="tel" name="phone" required placeholder="مثال: 0796959334" pattern="^0[567][0-9]{8}$" maxlength="10" title="يجب أن يتكون رقم الهاتف من 10 أرقام ويبدأ بـ 05 أو 06 أو 07">
+                <div class="form-group">
+                    <label>الاسم واللقب:</label>
+                    <input type="text" name="full_name" required placeholder="مثال: محمد دقيش">
+                </div>
                 
-                <label>كود التفعيل (إذا كان اشتراكاً جديداً):</label>
-                <input type="text" name="code" placeholder="أدخل كود التفعيل المكون من حروف وأرقام">
-                
-                <button type="submit" class="btn-primary" style="width: 100%;">دخول / تفعيل الاشتراك</button>
-            </form>
-            
-            <hr style="margin: 25px 0; border: 0; border-top: 1px solid #ddd;">
-            
-            <h4 style="margin-bottom: 10px;">للتلاميذ المسجلين مسبقاً (بالاسم والهاتف فقط):</h4>
-            <form action="{{ url_for('student_login') }}" method="POST">
-                <input type="hidden" name="action" value="login">
-                <input type="text" name="full_name" required placeholder="الاسم واللقب">
-                <input type="tel" name="phone" required placeholder="رقم الهاتف (10 أرقام صحيحة)" pattern="^0[567][0-9]{8}$" maxlength="10" title="يجب أن يتكون رقم الهاتف من 10 أرقام ويبدأ بـ 05 أو 06 أو 07">
-                <button type="submit" class="btn-primary" style="width: 100%; background-color: #6C2278;">دخول مباشر</button>
-            </form>
-        </div>
-
-        <div style="margin-top: 25px; display: flex; justify-content: space-between; font-size: 14px;">
-            <a href="{{ url_for('teacher_login') }}" style="color: #4A154B; text-decoration: none; font-weight: bold;">دخول الأساتذة</a>
-            <a href="{{ url_for('admin_panel') }}" style="color: #666; text-decoration: none;">لوحة المشرف</a>
-        </div>
-    </div>
-
-    <!-- كود الجافاسكريبت لحفظ واسترجاع بيانات التلميذ تلقائياً من المتصفح -->
-    <script>
-    window.addEventListener('DOMContentLoaded', () => {
-        const savedName = localStorage.getItem('daqiche_student_name');
-        const savedPhone = localStorage.getItem('daqiche_student_phone');
-
-        if (savedName && savedPhone) {
-            // تعبئة حقول الأسماء والهواتف في كلا النموذجين تلقائياً
-            document.querySelectorAll('input[name="full_name"]').forEach(input => input.value = savedName);
-            document.querySelectorAll('input[name="phone"]').forEach(input => input.value = savedPhone);
-        }
-    });
-
-    // حفظ البيانات عند إرسال أي نموذج تسجيل دخول أو تفعيل
-    document.querySelectorAll('form').forEach(form => {
-        form.addEventListener('submit', () => {
-            const nameInput = form.querySelector('input[name="full_name"]');
-            const phoneInput = form.querySelector('input[name="phone"]');
-            
-            if (nameInput && phoneInput && nameInput.value.trim() && phoneInput.value.trim()) {
-                localStorage.setItem('daqiche_student_name', nameInput.value.trim());
-                localStorage.setItem('daqiche_student_phone', phoneInput.value.trim());
-            }
-        });
-    });
-    </script>
-</body>
-</html>
+                <div class="form-group">
+                    <label>رقم الهاتف (10 أرقام):</label>
