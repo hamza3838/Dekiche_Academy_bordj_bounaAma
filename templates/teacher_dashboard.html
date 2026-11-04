@@ -62,11 +62,19 @@
                     <div class="form-group">
                         <label>السن الدراسي:</label>
                         <select name="school_year" required>
-                            <option value="السنة الأولى ابتدائي">السنة الأولى ابتدائي</option>
-                            <option value="السنة الثانية ابتدائي">السنة الثانية ابتدائي</option>
-                            <option value="السنة الثالثة ابتدائي">السنة الثالثة ابتدائي</option>
-                            <option value="السنة الرابعة ابتدائي">السنة الرابعة ابتدائي</option>
-                            <option value="السنة الخامسة ابتدائي">السنة الخامسة ابتدائي</option>
+                            <optgroup label="الطور الابتدائي">
+                                <option value="السنة الأولى ابتدائي">السنة الأولى ابتدائي</option>
+                                <option value="السنة الثانية ابتدائي">السنة الثانية ابتدائي</option>
+                                <option value="السنة الثالثة ابتدائي">السنة الثالثة ابتدائي</option>
+                                <option value="السنة الرابعة ابتدائي">السنة الرابعة ابتدائي</option>
+                                <option value="السنة الخامسة ابتدائي">السنة الخامسة ابتدائي</option>
+                            </optgroup>
+                            <optgroup label="الطور المتوسط">
+                                <option value="السنة الأولى متوسط">السنة الأولى متوسط</option>
+                                <option value="السنة الثانية متوسط">السنة الثانية متوسط</option>
+                                <option value="السنة الثالثة متوسط">السنة الثالثة متوسط</option>
+                                <option value="السنة الرابعة متوسط">السنة الرابعة متوسط</option>
+                            </optgroup>
                         </select>
                     </div>
                     <div class="form-group">
@@ -74,8 +82,12 @@
                         <select name="subject" required>
                             <option value="اللغة العربية">اللغة العربية</option>
                             <option value="الرياضيات">الرياضيات</option>
-                            <option value="الإنجليزية">الإنجليزية</option>
                             <option value="الفرنسية">الفرنسية</option>
+                            <option value="الإنجليزية">الإنجليزية</option>
+                            <option value="الفيزياء">الفيزياء (العلوم الفيزيائية)</option>
+                            <option value="العلوم الطبيعية">العلوم الطبيعية</option>
+                            <option value="الاجتماعيات">الاجتماعيات</option>
+                            <option value="التربية الإسلامية">التربية الإسلامية</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -108,7 +120,6 @@
                         <label>عنوان الدرس:</label>
                         <input type="text" name="title" placeholder="مثال: درس جمع الاعداد الطبيعية" required>
                     </div>
-                    <!-- حقل ترتيب الدرس الجديد -->
                     <div class="form-group">
                         <label>رقم الترتيب (الأولوية):</label>
                         <input type="number" name="lesson_order" value="0" placeholder="0" required>
@@ -121,8 +132,8 @@
                         <input type="url" name="video_url" placeholder="https://..." required>
                     </div>
                     <div class="form-group">
-                        <label>رابط ملف PDF (PDF URL):</label>
-                        <input type="url" name="pdf_url" placeholder="https://..." required>
+                        <label>رابط ملف PDF (اختياري):</label>
+                        <input type="url" name="pdf_url" placeholder="اتركه فارغاً إن لم يوجد ملف">
                     </div>
                 </div>
 
@@ -156,9 +167,14 @@
                                 <td>{{ l.month }} - {{ l.week }}</td>
                                 <td style="font-weight: 600; color: #e9bd68;">{{ l.title }}</td>
                                 <td><a href="{{ l.video_url }}" target="_blank" class="link-val">رابط الفيديو</a></td>
-                                <td><a href="{{ l.pdf_url }}" target="_blank" class="link-val">ملف PDF</a></td>
                                 <td>
-                                    <!-- زر حذف الدرس -->
+                                    {% if l.pdf_url %}
+                                        <a href="{{ l.pdf_url }}" target="_blank" class="link-val">ملف PDF</a>
+                                    {% else %}
+                                        <span style="color: #94a3b8;">لا يوجد</span>
+                                    {% endif %}
+                                </td>
+                                <td>
                                     <form action="{{ url_for('delete_lesson', lesson_id=l.id) }}" method="POST" onsubmit="return confirm('هل أنت متأكد من حذف هذا الدرس؟');" style="display:inline;">
                                         <button type="submit" class="btn-delete">حذف</button>
                                     </form>
