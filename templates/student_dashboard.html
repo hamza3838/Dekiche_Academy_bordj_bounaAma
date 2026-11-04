@@ -5,7 +5,7 @@
     <title>منصة أكاديمية دقيش - لوحة التلميذ</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <style>
-        /* كود احترافي لحجب أشرطة يوتيوب الجانبية والعلوية وجعل الفيديو يبدو حصرياً للمنصة */
+        /* كود احترافي لحجب أشرطة يوتيوب وحصر الفيديو داخل المنصة حصرياً */
         .video-container {
             position: relative;
             width: 100%;
@@ -25,26 +25,27 @@
             border: 0;
         }
         
-        /* طبقة حماية شفافة عريضة ومحسنة لحجب شعار وأزرار يوتيوب في الزاوية السفلية اليمنى */
+        /* طبقة حماية شفافة تمتد على كامل الشريط السفلي من اليمين إلى اليسار لمنع أزرار المشاركة ويوتيوب */
         .video-container::after {
             content: "";
             position: absolute;
             bottom: 0;
+            left: 0;
             right: 0;
-            width: 250px; /* زيادة العرض لتغطي زر يوتيوب والشعارات بالكامل */
-            height: 85px; /* زيادة الارتفاع لتغطية كامل الشريط السفلي */
+            width: 100%;
+            height: 85px; /* تغطية كامل الشريط السفلي بأكمله */
             background: transparent;
             z-index: 9999;
-            pointer-events: auto; /* لامتصاص النقلات ومنع الوصول لزر يوتيوب */
+            pointer-events: auto; /* لامتصاص أي نقرة وحجب الوصول للأزرار الخارجية */
         }
 
-        /* طبقة حماية إضافية للركن العُلوي لحجب أزرار المشاركة وعنوان الفيديو */
+        /* طبقة حماية علوية لحجب أي أزرار تظهر في الأعلى */
         .video-container::before {
             content: "";
             position: absolute;
             top: 0;
             right: 0;
-            width: 180px;
+            width: 220px;
             height: 75px;
             background: transparent;
             z-index: 9999;
@@ -126,9 +127,9 @@
                                 {% set embed_url = v_url %}
                             {% endif %}
 
-                            <!-- مشغل فيديو حصري ومحمي بالكامل مع تعطيل زر ملء الشاشة الخارجي بيوتيوب -->
+                            <!-- مشغل فيديو آمن مع طبقة حماية تمتد على كامل الشريط السفلي -->
                             <div class="video-container">
-                                <iframe src="{{ embed_url }}?rel=0&modestbranding=1&controls=1&showinfo=0&iv_load_policy=3&disablekb=1" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen="false"></iframe>
+                                <iframe src="{{ embed_url }}?rel=0&modestbranding=1&controls=1&showinfo=0&iv_load_policy=3&disablekb=1&fs=0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
                             </div>
                         </div>
                     {% endif %}
