@@ -37,6 +37,10 @@
         .btn-copy { background: #27ae60; color: white; border: none; padding: 10px 20px; border-radius: 10px; font-weight: 700; font-size: 14px; cursor: pointer; transition: 0.2s; display: inline-flex; align-items: center; gap: 8px; margin-bottom: 15px; }
         .btn-copy:hover { background: #219653; }
 
+        /* زر الحذف */
+        .btn-delete { background: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px; transition: 0.2s; }
+        .btn-delete:hover { background: #dc2626; }
+
         /* جدول الأكواد */
         .table-responsive { overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; margin-top: 10px; text-align: right; }
@@ -134,6 +138,7 @@
                             <th>الشهر</th>
                             <th>الحالة</th>
                             <th>التلميذ المستفيد</th>
+                            <th>الإجراء</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -152,11 +157,17 @@
                                     {% endif %}
                                 </td>
                                 <td>{{ c.student_name or '-' }} {% if c.phone and c.phone != '0000000000' %}({{ c.phone }}){% endif %}</td>
+                                <td>
+                                    <!-- زر حذف الكود الفردي -->
+                                    <form action="{{ url_for('delete_code', code_id=c.id) }}" method="POST" onsubmit="return confirm('هل أنت متأكد من حذف هذا الكود؟');" style="display:inline;">
+                                        <button type="submit" class="btn-delete">حذف</button>
+                                    </form>
+                                </td>
                             </tr>
                             {% endfor %}
                         {% else %}
                             <tr>
-                                <td colspan="6" class="empty-row">لا توجد أكواد مولّدة حتى الآن</td>
+                                <td colspan="7" class="empty-row">لا توجد أكواد مولّدة حتى الآن</td>
                             </tr>
                         {% endif %}
                     </tbody>
