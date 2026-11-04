@@ -33,11 +33,14 @@
         .btn-submit { background: #e9bd68; color: #0f172a; padding: 12px; border: none; border-radius: 10px; font-weight: 700; font-size: 15px; cursor: pointer; width: 100%; transition: 0.2s; }
         .btn-submit:hover { filter: brightness(1.1); }
 
-        /* زر النسخ */
-        .btn-copy { background: #27ae60; color: white; border: none; padding: 10px 20px; border-radius: 10px; font-weight: 700; font-size: 14px; cursor: pointer; transition: 0.2s; display: inline-flex; align-items: center; gap: 8px; margin-bottom: 15px; }
-        .btn-copy:hover { background: #219653; }
+        /* أزرار التحكم الجماعي (نسخ / حذف) */
+        .actions-bar { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px; align-items: center; }
+        .btn-action { background: #27ae60; color: white; border: none; padding: 10px 16px; border-radius: 10px; font-weight: 700; font-size: 13px; cursor: pointer; transition: 0.2s; display: inline-flex; align-items: center; gap: 6px; }
+        .btn-action:hover { filter: brightness(1.1); }
+        .btn-delete-all { background: #ef4444; }
+        .btn-delete-selected { background: #c0392b; }
 
-        /* زر الحذف */
+        /* زر الحذف الفردي */
         .btn-delete { background: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px; transition: 0.2s; }
         .btn-delete:hover { background: #dc2626; }
 
@@ -108,7 +111,6 @@
                             <option value="ماي">ماي</option>
                         </select>
                     </div>
-                    <!-- حقل اختيار عدد الأكواد المضافة -->
                     <div class="form-group">
                         <label>العدد:</label>
                         <input type="number" name="count" value="1" min="1" max="50" required>
@@ -122,62 +124,84 @@
 
         <!-- جدول الأكواد -->
         <div class="card">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; flex-wrap: wrap; gap: 10px;">
                 <h2 style="margin: 0; border: none; padding: 0;">قائمة الأكواد المُولّدة</h2>
-                <!-- زر نسخ كافة الأكواد -->
-                <button onclick="copyAllCodes()" class="btn-copy">📋 نسخ كافة الأكواد للطباعة</button>
+                
+                <!-- أزرار التحكم الجماعي (نسخ وحذف) -->
+                <div class="actions-bar">
+                    <button type="button" onclick="copySelectedCodes()" class="btn-action">📋 نسخ المُحددة</button>
+                    <button type="button" onclick="copyAllCodes()" class="btn-action" style="background: #2980b9;">📑 نسخ الكل</button>
+                    <button type="button" onclick="deleteSelected()" class="btn-action btn-delete-selected">🗑️ حذف المُحددة</button>
+                    <button type="button" onclick="deleteAllCodes()" class="btn-action btn-delete-all">⚠️ حذف كافة الأكواد</button>
+                </div>
             </div>
             
-            <div class="table-responsive">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>الكود</th>
-                            <th>السنة الدراسية</th>
-                            <th>المادة</th>
-                            <th>الشهر</th>
-                            <th>الحالة</th>
-                            <th>التلميذ المستفيد</th>
-                            <th>الإجراء</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% if codes %}
-                            {% for c in codes %}
+            <!-- نموذج إرسال الأكواد المحددة للحذف الجماعي -->
+            <form id="bulkDeleteForm" action="{{ url_for('delete_selected_codes') }}" method="POST">
+                <input type="hidden" name="action_type" id="actionTypeInput" value="selected">
+                
+                <div class="table-responsive">
+                    <table>
+                        <thead>
                             <tr>
-                                <td class="code-text">{{ c.code }}</td>
-                                <td>{{ c.grade }}</td>
-                                <td>{{ c.subject }}</td>
-                                <td>{{ c.month }}</td>
-                                <td>
-                                    {% if c.is_registered == 1 or c.is_used %}
-                                        <span class="badge-used">مستخدم</span>
-                                    {% else %}
-                                        <span class="badge-free">غير مستخدم</span>
-                                    {% endif %}
-                                </td>
-                                <td>{{ c.student_name or '-' }} {% if c.phone and c.phone != '0000000000' %}({{ c.phone }}){% endif %}</td>
-                                <td>
-                                    <!-- زر حذف الكود الفردي -->
-                                    <form action="{{ url_for('delete_code', code_id=c.id) }}" method="POST" onsubmit="return confirm('هل أنت متأكد من حذف هذا الكود؟');" style="display:inline;">
-                                        <button type="submit" class="btn-delete">حذف</button>
-                                    </form>
-                                </td>
+                                <th style="width: 40px; text-align: center;"><input type="checkbox" id="selectAll" onclick="toggleSelectAll(this)"></th>
+                                <th>الكود</th>
+                                <th>السنة الدراسية</th>
+                                <th>المادة</th>
+                                <th>الشهر</th>
+                                <th>الحالة</th>
+                                <th>التلميذ المستفيد</th>
+                                <th>الإجراء</th>
                             </tr>
-                            {% endfor %}
-                        {% else %}
-                            <tr>
-                                <td colspan="7" class="empty-row">لا توجد أكواد مولّدة حتى الآن</td>
-                            </tr>
-                        {% endif %}
-                    </tbody>
-                </table>
-            </div>
+                        </thead>
+                        <tbody>
+                            {% if codes %}
+                                {% for c in codes %}
+                                <tr>
+                                    <td style="text-align: center;">
+                                        <input type="checkbox" name="code_ids" value="{{ c.id }}" class="code-checkbox">
+                                    </td>
+                                    <td class="code-text">{{ c.code }}</td>
+                                    <td>{{ c.grade }}</td>
+                                    <td>{{ c.subject }}</td>
+                                    <td>{{ c.month }}</td>
+                                    <td>
+                                        {% if c.is_registered == 1 or c.is_used %}
+                                            <span class="badge-used">مستخدم</span>
+                                        {% else %}
+                                            <span class="badge-free">غير مستخدم</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ c.student_name or '-' }} {% if c.phone and c.phone != '0000000000' %}({{ c.phone }}){% endif %}</td>
+                                    <td>
+                                        <!-- زر حذف الكود الفردي -->
+                                        <form action="{{ url_for('delete_code', code_id=c.id) }}" method="POST" onsubmit="return confirm('هل أنت متأكد من حذف هذا الكود؟');" style="display:inline;">
+                                            <button type="submit" class="btn-delete">حذف</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="8" class="empty-row">لا توجد أكواد مولّدة حتى الآن</td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </form>
         </div>
     </div>
 
-    <!-- كود الجافاسكريبت المسؤول عن نسخ الأكواد للطباعة -->
+    <!-- جافاسكريبت للتحكم بالتحديد، النسخ، والحذف الجماعي -->
     <script>
+    // تحديد أو إلغاء تحديد الكل
+    function toggleSelectAll(source) {
+        checkboxes = document.querySelectorAll('.code-checkbox');
+        checkboxes.forEach(cb => cb.checked = source.checked);
+    }
+
+    // نسخ كافة الأكواد
     function copyAllCodes() {
         let codes = [];
         document.querySelectorAll('tr td.code-text').forEach(td => {
@@ -190,10 +214,53 @@
         }
 
         navigator.clipboard.writeText(codes.join('\n')).then(() => {
-            alert('تم نسخ ' + codes.length + ' كود بنجاح! يمكنك لصقها مباشرة في ملف Word للطباعة.');
+            alert('تم نسخ ' + codes.length + ' كود بنجاح!');
         }).catch(err => {
             alert('فشل النسخ: ' + err);
         });
+    }
+
+    // نسخ الأكواد المحددة فقط
+    function copySelectedCodes() {
+        let codes = [];
+        document.querySelectorAll('.code-checkbox:checked').forEach(cb => {
+            let row = cb.closest('tr');
+            let codeText = row.querySelector('.code-text').innerText.trim();
+            codes.push(codeText);
+        });
+
+        if(codes.length === 0) {
+            alert('الرجاء تحديد كود واحد على الأقل للنسخ!');
+            return;
+        }
+
+        navigator.clipboard.writeText(codes.join('\n')).then(() => {
+            alert('تم نسخ ' + codes.length + ' كود محدد بنجاح!');
+        }).catch(err => {
+            alert('فشل النسخ: ' + err);
+        });
+    }
+
+    // حذف الأكواد المحددة
+    function deleteSelected() {
+        let checkedCount = document.querySelectorAll('.code-checkbox:checked').length;
+        if(checkedCount === 0) {
+            alert('الرجاء تحديد كود واحد على الأقل للحذف!');
+            return;
+        }
+
+        if(confirm('هل أنت متأكد من حذف الأكواد المحددة (' + checkedCount + ' كود)؟')) {
+            document.getElementById('actionTypeInput').value = 'selected';
+            document.getElementById('bulkDeleteForm').submit();
+        }
+    }
+
+    // حذف كافة الأكواد دفعة واحدة
+    function deleteAllCodes() {
+        if(confirm('⚠️ تحذير شديد: هل أنت متأكد من حذف كافة الأكواد الموجودة في النظام نهائياً؟')) {
+            document.getElementById('actionTypeInput').value = 'all';
+            document.getElementById('bulkDeleteForm').submit();
+        }
     }
     </script>
 </body>
