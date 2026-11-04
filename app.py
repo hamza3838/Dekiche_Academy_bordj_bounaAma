@@ -43,7 +43,7 @@ def student_login():
             session['phone'] = phone
             return redirect(url_for('student_dashboard'))
         else:
-            flash("البيانات غير صحيحة أو لم تقم تفعيل كود من قبل.", "danger")
+            flash("البيانات غير صحيحة أو لم تقم بتفعيل كود من قبل.", "danger")
             return redirect(url_for('home'))
 
     elif action == 'redeem':
@@ -284,6 +284,36 @@ def delete_code(code_id):
         flash("تم حذف الكود بنجاح!", "success")
     except Exception as e:
         flash(f"خطأ أثناء حذف الكود: {e}", "danger")
+
+    return redirect(url_for('admin_panel'))
+
+# --- مسار الحذف الجماعي أو المختار للأكواد للمشرف ---
+@app.route('/delete-selected-codes', methods=['POST'])
+def delete_selected_codes():
+    if not session.get('is_admin'):
+        return redirect(url_for('admin_panel'))
+
+    if not supabase:
+        flash("عذراً، الاتصال بقاعدة البيانات غير متوفر حالياً.", "danger")
+        return redirect(url_for('admin_panel'))
+
+    selected_ids = request.form.getlist('code_ids')
+    action_type = request.form.get('action_type')
+
+    try:
+        if action_type == 'all':
+            # حذف كافة الأكواد في القاعدة
+            supabase.table('access_codes').delete().gt('id', 0).execute()
+            flash("تم حذف كافة الأكواد بنجاح!", "success")
+        elif selected_ids:
+            # حذف الأكواد المحددة فقط
+            for code_id in selected_ids:
+                supabase.table('access_codes').delete().eq('id', int(code_id)).execute()
+            flash(f"تم حذف {len(selected_ids)} كود بنجاح!", "success")
+        else:
+            flash("لم يتم تحديد أي كود للحذف!", "danger")
+    except Exception as e:
+        flash(f"خطأ أثناء الحذف: {e}", "danger")
 
     return redirect(url_for('admin_panel'))
 
