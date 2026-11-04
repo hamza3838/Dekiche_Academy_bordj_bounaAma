@@ -57,7 +57,7 @@
             margin: 10px 0;
         }
 
-        /* حاوية الفيديو مع تفعيل الطبقات الحامية بدقة */
+        /* حاوية الفيديو مع دروع حماية موسعة تغطي يوتيوب والمشاركة تماماً */
         .video-container {
             position: relative;
             width: 100%;
@@ -75,27 +75,27 @@
             border: 0;
         }
         
-        /* طبقة حماية الزاوية اليمنى السفلية (شعار يوتيوب) - تم تعزيز الطبقة وزيادة الـ z-index */
+        /* طبقة حماية الزاوية اليمنى (تم توسيع العرض لتغطية شعار يوتيوب بالكامل بدقة) */
         .video-container::after {
             content: "";
             position: absolute;
             bottom: 0;
             right: 0;
-            width: 150px;
-            height: 55px;
+            width: 220px;
+            height: 60px;
             background: transparent;
             z-index: 2147483647;
             pointer-events: auto;
         }
 
-        /* طبقة حماية الزاوية اليسرى السفلية (زر المشاركة) - تم تعزيز الطبقة وزيادة الـ z-index */
+        /* طبقة حماية الزاوية اليسرى (تغطية زر المشاركة) */
         .video-container::before {
             content: "";
             position: absolute;
             bottom: 0;
             left: 0;
-            width: 150px;
-            height: 55px;
+            width: 180px;
+            height: 60px;
             background: transparent;
             z-index: 2147483647;
             pointer-events: auto;
@@ -175,7 +175,7 @@
                                     {% set embed_url = v_url %}
                                 {% endif %}
 
-                                <!-- مشغل فيديو يملأ العرض بالكامل مع الطبقات الشفافة المحمية -->
+                                <!-- مشغل فيديو يملأ العرض بالكامل مع درع حماية واسع ومحكم -->
                                 <div class="video-container">
                                     <iframe src="{{ embed_url }}?rel=0&modestbranding=1&controls=1&showinfo=0&iv_load_policy=3&disablekb=1&fs=0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
                                 </div>
