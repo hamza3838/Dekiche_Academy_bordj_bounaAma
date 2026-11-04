@@ -26,7 +26,7 @@
         .alert-danger { background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; color: #fca5a5; }
 
         /* نموذج توليد الأكواد */
-        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; align-items: end; }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; align-items: end; }
         .form-group label { display: block; font-size: 13px; color: #94a3b8; margin-bottom: 6px; font-weight: 600; }
         .form-group select, .form-group input { width: 100%; padding: 12px; background: #0f172a; border: 1px solid #334155; color: #f8fafc; border-radius: 10px; font-size: 14px; outline: none; transition: 0.2s; }
         .form-group select:focus, .form-group input:focus { border-color: #e9bd68; }
@@ -78,24 +78,24 @@
             <form method="POST">
                 <input type="hidden" name="generate_code" value="1">
                 <div class="form-grid">
+                    <!-- اختيار الطور أولاً -->
                     <div class="form-group">
-                        <label>السن الدراسي:</label>
-                        <select name="school_year" required>
-                            <optgroup label="الطور الابتدائي">
-                                <option value="السنة الأولى ابتدائي">السنة الأولى ابتدائي</option>
-                                <option value="السنة الثانية ابتدائي">السنة الثانية ابتدائي</option>
-                                <option value="السنة الثالثة ابتدائي">السنة الثالثة ابتدائي</option>
-                                <option value="السنة الرابعة ابتدائي">السنة الرابعة ابتدائي</option>
-                                <option value="السنة الخامسة ابتدائي">السنة الخامسة ابتدائي</option>
-                            </optgroup>
-                            <optgroup label="الطور المتوسط">
-                                <option value="السنة الأولى متوسط">السنة الأولى متوسط</option>
-                                <option value="السنة الثانية متوسط">السنة الثانية متوسط</option>
-                                <option value="السنة الثالثة متوسط">السنة الثالثة متوسط</option>
-                                <option value="السنة الرابعة متوسط">السنة الرابعة متوسط</option>
-                            </optgroup>
+                        <label>الطور التعليمي:</label>
+                        <select id="cycleSelect" onchange="updateGrades()" required>
+                            <option value="">اختر الطور...</option>
+                            <option value="الابتدائي">التعليم الابتدائي</option>
+                            <option value="المتوسط">التعليم المتوسط</option>
                         </select>
                     </div>
+
+                    <!-- اختيار السنة بناءً على الطور -->
+                    <div class="form-group">
+                        <label>السنة الدراسية:</label>
+                        <select name="school_year" id="gradeSelect" required>
+                            <option value="">اختر الطور أولاً...</option>
+                        </select>
+                    </div>
+
                     <div class="form-group">
                         <label>المادة:</label>
                         <select name="subject" required>
@@ -205,8 +205,44 @@
         </div>
     </div>
 
-    <!-- جافاسكريبت للتحكم بالتحديد، النسخ، والحذف الجماعي -->
+    <!-- جافاسكريبت للتحكم بالسنوات حسب الطور، النسخ، والحذف الجماعي -->
     <script>
+    function updateGrades() {
+        const cycle = document.getElementById('cycleSelect').value;
+        const gradeSelect = document.getElementById('gradeSelect');
+        
+        gradeSelect.innerHTML = '<option value="">اختر السن الدراسي...</option>';
+        
+        if (cycle === 'الابتدائي') {
+            const primaryGrades = [
+                "السنة الأولى ابتدائي",
+                "السنة الثانية ابتدائي",
+                "السنة الثالثة ابتدائي",
+                "السنة الرابعة ابتدائي",
+                "السنة الخامسة ابتدائي"
+            ];
+            primaryGrades.forEach(grade => {
+                let opt = document.createElement('option');
+                opt.value = grade;
+                opt.textContent = grade;
+                gradeSelect.appendChild(opt);
+            });
+        } else if (cycle === 'المتوسط') {
+            const middleGrades = [
+                "السنة الأولى متوسط",
+                "السنة الثانية متوسط",
+                "السنة الثالثة متوسط",
+                "السنة الرابعة متوسط"
+            ];
+            middleGrades.forEach(grade => {
+                let opt = document.createElement('option');
+                opt.value = grade;
+                opt.textContent = grade;
+                gradeSelect.appendChild(opt);
+            });
+        }
+    }
+
     // تحديد أو إلغاء تحديد الكل
     function toggleSelectAll(source) {
         checkboxes = document.querySelectorAll('.code-checkbox');
