@@ -58,5 +58,32 @@
             <a href="{{ url_for('admin_panel') }}" style="color: #666; text-decoration: none;">لوحة المشرف</a>
         </div>
     </div>
+
+    <!-- كود الجافاسكريبت لحفظ واسترجاع بيانات التلميذ تلقائياً من المتصفح -->
+    <script>
+    window.addEventListener('DOMContentLoaded', () => {
+        const savedName = localStorage.getItem('daqiche_student_name');
+        const savedPhone = localStorage.getItem('daqiche_student_phone');
+
+        if (savedName && savedPhone) {
+            // تعبئة حقول الأسماء والهواتف في كلا النموذجين تلقائياً
+            document.querySelectorAll('input[name="full_name"]').forEach(input => input.value = savedName);
+            document.querySelectorAll('input[name="phone"]').forEach(input => input.value = savedPhone);
+        }
+    });
+
+    // حفظ البيانات عند إرسال أي نموذج تسجيل دخول أو تفعيل
+    document.querySelectorAll('form').forEach(form => {
+        form.addEventListener('submit', () => {
+            const nameInput = form.querySelector('input[name="full_name"]');
+            const phoneInput = form.querySelector('input[name="phone"]');
+            
+            if (nameInput && phoneInput && nameInput.value.trim() && phoneInput.value.trim()) {
+                localStorage.setItem('daqiche_student_name', nameInput.value.trim());
+                localStorage.setItem('daqiche_student_phone', phoneInput.value.trim());
+            }
+        });
+    });
+    </script>
 </body>
 </html>
