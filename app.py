@@ -92,7 +92,8 @@ def student_dashboard():
                 m_val = sub.get('month') or sub.get('code_month')
                 
                 if g_val and sub_val and m_val:
-                    l_res = supabase.table('lessons').select('*').eq('school_year', g_val).eq('subject', sub_val).eq('month', str(m_val)).execute()
+                    # جلب الدروس مرتبة حسب الترتيب (lesson_order) تنازلياً أو تصاعدياً
+                    l_res = supabase.table('lessons').select('*').eq('school_year', g_val).eq('subject', sub_val).eq('month', str(m_val)).order('lesson_order', desc=False).execute()
                     if l_res and l_res.data:
                         lessons.extend(l_res.data)
     except Exception as e:
@@ -127,6 +128,12 @@ def teacher_dashboard():
         title = request.form.get('title')
         video_url = request.form.get('video_url')
         pdf_url = request.form.get('pdf_url')
+        
+        # إضافة دعم ترتيب الدرس (lesson_order) افتراضياً 0
+        try:
+            lesson_order = int(request.form.get('lesson_order', 0))
+        except ValueError:
+            lesson_order = 0
 
         try:
             supabase.table('lessons').insert({
@@ -136,7 +143,8 @@ def teacher_dashboard():
                 'week': week,
                 'title': title,
                 'video_url': video_url,
-                'pdf_url': pdf_url
+                'pdf_url': pdf_url,
+                'lesson_order': lesson_order
             }).execute()
             flash("تم إضافة الدرس بنجاح!", "success")
         except Exception as e:
@@ -144,13 +152,32 @@ def teacher_dashboard():
 
     lessons_data = []
     try:
-        lessons_res = supabase.table('lessons').select('*').order('created_at', desc=True).execute()
+        # جلب الدروس مرتبة حسب الترتيب (lesson_order)
+        lessons_res = supabase.table('lessons').select('*').order('lesson_order', desc=False).execute()
         if lessons_res and lessons_res.data:
             lessons_data = lessons_res.data
     except Exception as e:
         pass
 
     return render_template('teacher_dashboard.html', lessons=lessons_data)
+
+# --- مسار حذف الدرس للأستاذ ---
+@app.route('/delete-lesson/<int:lesson_id>', methods=['POST'])
+def delete_lesson(lesson_id):
+    if not session.get('is_teacher'):
+        return redirect(url_for('teacher_login'))
+
+    if not supabase:
+        flash("عذراً، الاتصال بقاعدة البيانات غير متوفر حالياً.", "danger")
+        return redirect(url_for('teacher_dashboard'))
+
+    try:
+        supabase.table('lessons').delete().eq('id', lesson_id).execute()
+        flash("تم حذف الدرس بنجاح!", "success")
+    except Exception as e:
+        flash(f"خطأ أثناء حذف الدرس: {e}", "danger")
+
+    return redirect(url_for('teacher_dashboard'))
 
 @app.route('/admin-secret-panel-daqiche', methods=['GET', 'POST'])
 def admin_panel():
@@ -168,29 +195,38 @@ def admin_panel():
         return render_template('admin_panel.html', codes=[])
 
     if request.method == 'POST' and 'generate_code' in request.form:
-        random_code = "DAQ-" + ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
-        
         school_year = request.form.get('school_year')
         subject = request.form.get('subject')
         month = request.form.get('month')
+
+        # قراءة العدد المطلوب توليده دفعة واحدة (افتراضياً 1)
+        try:
+            count = int(request.form.get('count', 1))
+            if count < 1: count = 1
+            if count > 50: count = 50  # حد أقصى في الدفعة الواحدة للأمان
+        except ValueError:
+            count = 1
 
         # تحديد تاريخ انتهاء افتراضي (بعد سنة من الآن) لتجنب خطأ expires_at
         future_date = (datetime.datetime.now() + datetime.timedelta(days=365)).strftime('%Y-%m-%d %H:%M:%S')
 
         try:
-            supabase.table('access_codes').insert({
-                'code': random_code,
-                'grade': school_year,
-                'subject': subject,
-                'month': month,
-                'is_registered': 0,
-                'student_name': "غير محدد",
-                'phone': "0000000000",
-                'expires_at': future_date
-            }).execute()
-            flash(f"تم توليد الكود بنجاح: {random_code}", "success")
+            for _ in range(count):
+                random_code = "DAQ-" + ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+                supabase.table('access_codes').insert({
+                    'code': random_code,
+                    'grade': school_year,
+                    'subject': subject,
+                    'month': month,
+                    'is_registered': 0,
+                    'student_name': "غير محدد",
+                    'phone': "0000000000",
+                    'expires_at': future_date
+                }).execute()
+            
+            flash(f"تم توليد {count} كود بنجاح!", "success")
         except Exception as e:
-            flash(f"خطأ أثناء حفظ الكود: {e}", "danger")
+            flash(f"خطأ أثناء حفظ الأكواد: {e}", "danger")
 
     codes = []
     try:
