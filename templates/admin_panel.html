@@ -26,12 +26,16 @@
         .alert-danger { background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; color: #fca5a5; }
 
         /* نموذج توليد الأكواد */
-        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; align-items: end; }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; align-items: end; }
         .form-group label { display: block; font-size: 13px; color: #94a3b8; margin-bottom: 6px; font-weight: 600; }
-        .form-group select { width: 100%; padding: 12px; background: #0f172a; border: 1px solid #334155; color: #f8fafc; border-radius: 10px; font-size: 14px; outline: none; transition: 0.2s; }
-        .form-group select:focus { border-color: #e9bd68; }
+        .form-group select, .form-group input { width: 100%; padding: 12px; background: #0f172a; border: 1px solid #334155; color: #f8fafc; border-radius: 10px; font-size: 14px; outline: none; transition: 0.2s; }
+        .form-group select:focus, .form-group input:focus { border-color: #e9bd68; }
         .btn-submit { background: #e9bd68; color: #0f172a; padding: 12px; border: none; border-radius: 10px; font-weight: 700; font-size: 15px; cursor: pointer; width: 100%; transition: 0.2s; }
         .btn-submit:hover { filter: brightness(1.1); }
+
+        /* زر النسخ */
+        .btn-copy { background: #27ae60; color: white; border: none; padding: 10px 20px; border-radius: 10px; font-weight: 700; font-size: 14px; cursor: pointer; transition: 0.2s; display: inline-flex; align-items: center; gap: 8px; margin-bottom: 15px; }
+        .btn-copy:hover { background: #219653; }
 
         /* جدول الأكواد */
         .table-responsive { overflow-x: auto; }
@@ -63,7 +67,7 @@
 
         <!-- قسم توليد كود جديد -->
         <div class="card">
-            <h2>توليد كود تفعيل جديد</h2>
+            <h2>توليد أكواد التفعيل</h2>
             <form method="POST">
                 <input type="hidden" name="generate_code" value="1">
                 <div class="form-grid">
@@ -100,8 +104,13 @@
                             <option value="ماي">ماي</option>
                         </select>
                     </div>
+                    <!-- حقل اختيار عدد الأكواد المضافة -->
                     <div class="form-group">
-                        <button type="submit" class="btn-submit">توليد الكود الآن</button>
+                        <label>العدد:</label>
+                        <input type="number" name="count" value="1" min="1" max="50" required>
+                    </div>
+                    <div class="form-group">
+                        <button type="submit" class="btn-submit">توليد الأكواد الآن</button>
                     </div>
                 </div>
             </form>
@@ -109,7 +118,12 @@
 
         <!-- جدول الأكواد -->
         <div class="card">
-            <h2>قائمة الأكواد المُولّدة</h2>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px;">
+                <h2 style="margin: 0; border: none; padding: 0;">قائمة الأكواد المُولّدة</h2>
+                <!-- زر نسخ كافة الأكواد -->
+                <button onclick="copyAllCodes()" class="btn-copy">📋 نسخ كافة الأكواد للطباعة</button>
+            </div>
+            
             <div class="table-responsive">
                 <table>
                     <thead>
@@ -131,13 +145,13 @@
                                 <td>{{ c.subject }}</td>
                                 <td>{{ c.month }}</td>
                                 <td>
-                                    {% if c.is_used %}
+                                    {% if c.is_registered == 1 or c.is_used %}
                                         <span class="badge-used">مستخدم</span>
                                     {% else %}
                                         <span class="badge-free">غير مستخدم</span>
                                     {% endif %}
                                 </td>
-                                <td>{{ c.student_name or '-' }} {% if c.phone %}({{ c.phone }}){% endif %}</td>
+                                <td>{{ c.student_name or '-' }} {% if c.phone and c.phone != '0000000000' %}({{ c.phone }}){% endif %}</td>
                             </tr>
                             {% endfor %}
                         {% else %}
@@ -150,5 +164,26 @@
             </div>
         </div>
     </div>
+
+    <!-- كود الجافاسكريبت المسؤول عن نسخ الأكواد للطباعة -->
+    <script>
+    function copyAllCodes() {
+        let codes = [];
+        document.querySelectorAll('tr td.code-text').forEach(td => {
+            codes.push(td.innerText.trim());
+        });
+        
+        if(codes.length === 0) {
+            alert('لا توجد أكواد للنسخ حالياً!');
+            return;
+        }
+
+        navigator.clipboard.writeText(codes.join('\n')).then(() => {
+            alert('تم نسخ ' + codes.length + ' كود بنجاح! يمكنك لصقها مباشرة في ملف Word للطباعة.');
+        }).catch(err => {
+            alert('فشل النسخ: ' + err);
+        });
+    }
+    </script>
 </body>
 </html>
