@@ -102,6 +102,37 @@ def student_dashboard():
 
     return render_template('student_dashboard.html', student_name=student_name, subscriptions=subscriptions, lessons=lessons)
 
+# --- مسار تفعيل كود الشهر الجديد من داخل حساب التلميذ ---
+@app.route('/redeem-code', methods=['POST'])
+def redeem_code():
+    if 'student_name' not in session:
+        return redirect(url_for('home'))
+
+    if not supabase:
+        flash("عذراً، الاتصال بقاعدة البيانات غير متوفر حالياً.", "danger")
+        return redirect(url_for('student_dashboard'))
+
+    code_text = request.form.get('code')
+    student_name = session['student_name']
+    phone = session['phone']
+
+    code_res = supabase.table('access_codes').select('*').eq('code', code_text).eq('is_registered', 0).execute()
+    
+    if not code_res.data:
+        flash("الكود غير صالح أو تم استخدامه مسبقاً!", "danger")
+        return redirect(url_for('student_dashboard'))
+    
+    code_data = code_res.data[0]
+
+    supabase.table('access_codes').update({
+        'student_name': student_name,
+        'phone': phone,
+        'is_registered': 1
+    }).eq('id', code_data['id']).execute()
+
+    flash("تم تفعيل اشتراك الشهر الجديد بنجاح!", "success")
+    return redirect(url_for('student_dashboard'))
+
 @app.route('/teacher-login', methods=['GET', 'POST'])
 def teacher_login():
     if request.method == 'POST':
@@ -237,6 +268,24 @@ def admin_panel():
         pass
 
     return render_template('admin_panel.html', codes=codes)
+
+# --- مسار حذف كود معين للمشرف ---
+@app.route('/delete-code/<int:code_id>', methods=['POST'])
+def delete_code(code_id):
+    if not session.get('is_admin'):
+        return redirect(url_for('admin_panel'))
+
+    if not supabase:
+        flash("عذراً، الاتصال بقاعدة البيانات غير متوفر حالياً.", "danger")
+        return redirect(url_for('admin_panel'))
+
+    try:
+        supabase.table('access_codes').delete().eq('id', code_id).execute()
+        flash("تم حذف الكود بنجاح!", "success")
+    except Exception as e:
+        flash(f"خطأ أثناء حذف الكود: {e}", "danger")
+
+    return redirect(url_for('admin_panel'))
 
 @app.route('/logout')
 def logout():
