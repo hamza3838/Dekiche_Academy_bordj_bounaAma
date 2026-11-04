@@ -45,7 +45,7 @@
         .video-container {
             position: relative;
             width: 100%;
-            padding-bottom: 56.25%; /* نسبة الأبعاد 16:9 */
+            padding-bottom: 56.25%; /* نسبة الأبعاد الأساسية 16:9 */
             height: 0;
             overflow: hidden;
             border-radius: 12px;
@@ -53,6 +53,14 @@
             box-shadow: 0 4px 20px rgba(0,0,0,0.3);
             margin-bottom: 15px;
         }
+
+        /* تحسين وتكبير عرض الفيديو على الهواتف الذكية */
+        @media (max-width: 768px) {
+            .video-container {
+                padding-bottom: 65%; /* زيادة الارتفاع قليلاً ليملأ الشاشة بوضوح على الجوال */
+            }
+        }
+
         .video-container iframe {
             position: absolute;
             top: 0;
@@ -157,7 +165,7 @@
                                     {% set embed_url = v_url %}
                                 {% endif %}
 
-                                <!-- مشغل فيديو آمن مع حجب أزرار يوتيوب والمشاركة وإبقاء شريط التقدم حراً -->
+                                <!-- مشغل فيديو آمن ومحسن للهواتف -->
                                 <div class="video-container">
                                     <iframe src="{{ embed_url }}?rel=0&modestbranding=1&controls=1&showinfo=0&iv_load_policy=3&disablekb=1&fs=0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
                                 </div>
