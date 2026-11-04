@@ -24,6 +24,20 @@
             height: 100%;
             border: 0;
         }
+        
+        /* طبقة حماية شفافة لغطاء وحجب زر "المشاهدة على يوتيوب" في الزاوية السفلى */
+        .video-container::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 130px;
+            height: 50px;
+            background: transparent;
+            z-index: 999;
+            pointer-events: auto;
+        }
+
         /* إطار خارجي راقي يحمي محتوى الدرس */
         .lesson-player-box {
             background: #1e1b4b;
@@ -99,7 +113,7 @@
                                 {% set embed_url = v_url %}
                             {% endif %}
 
-                            <!-- مشغل فيديو حصري ونظيف مع حجب أزرار يوتيوب -->
+                            <!-- مشغل فيديو حصري ونظيف مع طبقة حماية لحجب أزرار يوتيوب -->
                             <div class="video-container">
                                 <iframe src="{{ embed_url }}?rel=0&modestbranding=1&controls=1&showinfo=0&iv_load_policy=3&disablekb=1" allowfullscreen></iframe>
                             </div>
