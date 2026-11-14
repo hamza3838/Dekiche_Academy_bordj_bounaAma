@@ -104,7 +104,7 @@ def student_dashboard():
                 m_val = sub.get('month') or sub.get('code_month')
                 
                 if g_val and sub_val and m_val:
-                    # جلب الدروس مرتبة حسب الترتيب (lesson_order)
+                    # جلب الدروس مرتبة حسب الترتيب (lesson_order) مع دعم الأشهر الرقمية
                     l_res = supabase.table('lessons').select('*').eq('school_year', g_val).eq('subject', sub_val).eq('month', str(m_val)).order('lesson_order', desc=False).execute()
                     if l_res and l_res.data:
                         lessons.extend(l_res.data)
@@ -166,8 +166,8 @@ def teacher_dashboard():
     if request.method == 'POST':
         school_year = request.form.get('school_year')
         subject = request.form.get('subject')
-        unit = request.form.get('unit')  # المقطع التعليمي الجديد
-        month = request.form.get('month')
+        unit = request.form.get('unit')  # المقطع التعليمي
+        month = request.form.get('month')  # الشهر بنظام الأرقام (مثل الشهر 1)
         week = request.form.get('week')
         title = request.form.get('title')
         video_url = request.form.get('video_url')
@@ -182,7 +182,7 @@ def teacher_dashboard():
             supabase.table('lessons').insert({
                 'school_year': school_year,
                 'subject': subject,
-                'unit': unit,  # حفظ المقطع في قاعدة البيانات
+                'unit': unit,
                 'month': month,
                 'week': week,
                 'title': title,
@@ -203,6 +203,63 @@ def teacher_dashboard():
         pass
 
     return render_template('teacher_dashboard.html', lessons=lessons_data)
+
+# --- مسار تعديل الدرس للأستاذ (تحديث المقطع، الأسبوع، وبقية البيانات) ---
+@app.route('/edit-lesson/<int:lesson_id>', methods=['GET', 'POST'])
+def edit_lesson(lesson_id):
+    if not session.get('is_teacher'):
+        return redirect(url_for('teacher_login'))
+
+    if not supabase:
+        flash("عذراً، الاتصال بقاعدة البيانات غير متوفر حالياً.", "danger")
+        return redirect(url_for('teacher_dashboard'))
+
+    if request.method == 'GET':
+        try:
+            res = supabase.table('lessons').select('*').eq('id', lesson_id).execute()
+            if res.data:
+                lesson = res.data[0]
+                return render_template('edit_lesson.html', lesson=lesson)
+            else:
+                flash("الدرس غير موجود.", "danger")
+                return redirect(url_for('teacher_dashboard'))
+        except Exception as e:
+            flash(f"خطأ أثناء جلب الدرس: {e}", "danger")
+            return redirect(url_for('teacher_dashboard'))
+
+    if request.method == 'POST':
+        school_year = request.form.get('school_year')
+        subject = request.form.get('subject')
+        unit = request.form.get('unit')
+        month = request.form.get('month')
+        week = request.form.get('week')
+        title = request.form.get('title')
+        video_url = request.form.get('video_url')
+        pdf_url = request.form.get('pdf_url')
+        
+        try:
+            lesson_order = int(request.form.get('lesson_order', 0))
+        except ValueError:
+            lesson_order = 0
+
+        try:
+            supabase.table('lessons').update({
+                'school_year': school_year,
+                'subject': subject,
+                'unit': unit,
+                'month': month,
+                'week': week,
+                'title': title,
+                'video_url': video_url,
+                'pdf_url': pdf_url,
+                'lesson_order': lesson_order
+            }).eq('id', lesson_id).execute()
+            
+            flash("تم تحديث وتعديل الدرس بنجاح!", "success")
+        except Exception as e:
+            flash(f"خطأ أثناء تحديث الدرس: {e}", "danger")
+
+        return redirect(url_for('teacher_dashboard'))
 
 # --- مسار حذف الدرس للأستاذ ---
 @app.route('/delete-lesson/<int:lesson_id>', methods=['POST'])
@@ -240,7 +297,7 @@ def admin_panel():
     if request.method == 'POST' and 'generate_code' in request.form:
         school_year = request.form.get('school_year')
         subject = request.form.get('subject')
-        month = request.form.get('month')
+        month = request.form.get('month')  # الشهر بنظام الأرقام (الشهر 1، الشهر 2...)
 
         try:
             count = int(request.form.get('count', 1))
