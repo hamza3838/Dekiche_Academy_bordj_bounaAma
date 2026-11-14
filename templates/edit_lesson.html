@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تعديل الدرس - أكاديمية دقيش</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; }
+        body { background: #0f172a; color: #f8fafc; min-height: 100vh; padding: 20px; direction: rtl; }
+        .wrapper { max-width: 800px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px; }
+        .card { background: #1e293b; border: 1px solid rgba(233, 189, 104, 0.2); border-radius: 16px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+        .card h2 { color: #e9bd68; font-size: 20px; margin-bottom: 20px; font-weight: 700; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 16px; }
+        .form-group label { display: block; font-size: 13px; color: #94a3b8; margin-bottom: 6px; font-weight: 600; }
+        .form-group select, .form-group input { width: 100%; padding: 12px; background: #0f172a; border: 1px solid #334155; color: #f8fafc; border-radius: 10px; font-size: 14px; outline: none; transition: 0.2s; }
+        .form-group select:focus, .form-group input:focus { border-color: #e9bd68; }
+        .btn-submit { background: #e9bd68; color: #0f172a; padding: 12px; border: none; border-radius: 10px; font-weight: 700; font-size: 15px; cursor: pointer; width: 100%; transition: 0.2s; margin-top: 10px; }
+        .btn-submit:hover { filter: brightness(1.1); }
+        .btn-back { display: inline-block; background: #334155; color: #f8fafc; padding: 8px 16px; border-radius: 8px; text-decoration: none; font-size: 14px; margin-bottom: 15px; font-weight: 600; }
+        .btn-back:hover { background: #475569; }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <div>
+            <a href="{{ url_for('teacher_dashboard') }}" class="btn-back">← العودة إلى لوحة التحكم</a>
+        </div>
+
+        <div class="card">
+            <h2>✏️ تعديل بيانات الدرس</h2>
+            <form method="POST">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>السنة الدراسية:</label>
+                        <select name="school_year" required>
+                            <option value="السنة الأولى ابتدائي" {% if lesson.school_year == 'السنة الأولى ابتدائي' %}selected{% endif %}>السنة الأولى ابتدائي</option>
+                            <option value="السنة الثانية ابتدائي" {% if lesson.school_year == 'السنة الثانية ابتدائي' %}selected{% endif %}>السنة الثانية ابتدائي</option>
+                            <option value="السنة الثالثة ابتدائي" {% if lesson.school_year == 'السنة الثالثة ابتدائي' %}selected{% endif %}>السنة الثالثة ابتدائي</option>
+                            <option value="السنة الرابعة ابتدائي" {% if lesson.school_year == 'السنة الرابعة ابتدائي' %}selected{% endif %}>السنة الرابعة ابتدائي</option>
+                            <option value="السنة الخامسة ابتدائي" {% if lesson.school_year == 'السنة الخامسة ابتدائي' %}selected{% endif %}>السنة الخامسة ابتدائي</option>
+                            <option value="السنة الأولى متوسط" {% if lesson.school_year == 'السنة الأولى متوسط' %}selected{% endif %}>السنة الأولى متوسط</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>المادة:</label>
+                        <select name="subject" required>
+                            <option value="اللغة العربية" {% if lesson.subject == 'اللغة العربية' %}selected{% endif %}>اللغة العربية</option>
+                            <option value="الرياضيات" {% if lesson.subject == 'الرياضيات' %}selected{% endif %}>الرياضيات</option>
+                            <option value="الفرنسية" {% if lesson.subject == 'الفرنسية' %}selected{% endif %}>الفرنسية</option>
+                            <option value="الإنجليزية" {% if lesson.subject == 'الإنجليزية' %}selected{% endif %}>الإنجليزية</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>المقطع التعليمي:</label>
+                        <select name="unit" required>
+                            <option value="المقطع الأول" {% if lesson.unit == 'المقطع الأول' %}selected{% endif %}>المقطع الأول</option>
+                            <option value="المقطع الثاني" {% if lesson.unit == 'المقطع الثاني' %}selected{% endif %}>المقطع الثاني</option>
+                            <option value="المقطع الثالث" {% if lesson.unit == 'المقطع الثالث' %}selected{% endif %}>المقطع الثالث</option>
+                            <option value="المقطع الرابع" {% if lesson.unit == 'المقطع الرابع' %}selected{% endif %}>المقطع الرابع</option>
+                            <option value="المقطع الخامس" {% if lesson.unit == 'المقطع الخامس' %}selected{% endif %}>المقطع الخامس</option>
+                            <option value="المقطع السادس" {% if lesson.unit == 'المقطع السادس' %}selected{% endif %}>المقطع السادس</option>
+                            <option value="المقطع السابع" {% if lesson.unit == 'المقطع السابع' %}selected{% endif %}>المقطع السابع</option>
+                            <option value="المقطع الثامن" {% if lesson.unit == 'المقطع الثامن' %}selected{% endif %}>المقطع الثامن</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>الشهر:</label>
+                        <select name="month" required>
+                            {% for i in range(1, 9) %}
+                                <option value="الشهر {{ i }}" {% if lesson.month == 'الشهر ' ~ i %}selected{% endif %}>الشهر {{ i }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>الأسبوع:</label>
+                        <select name="week" required>
+                            <option value="الأسبوع الأول" {% if lesson.week == 'الأسبوع الأول' %}selected{% endif %}>الأسبوع الأول</option>
+                            <option value="الأسبوع الثاني" {% if lesson.week == 'الأسبوع الثاني' %}selected{% endif %}>الأسبوع الثاني</option>
+                            <option value="الأسبوع الثالث" {% if lesson.week == 'الأسبوع الثالث' %}selected{% endif %}>الأسبوع الثالث</option>
+                            <option value="الأسبوع الرابع" {% if lesson.week == 'الأسبوع الرابع' %}selected{% endif %}>الأسبوع الرابع</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-grid" style="grid-template-columns: 2fr 1fr;">
+                    <div class="form-group">
+                        <label>عنوان الدرس:</label>
+                        <input type="text" name="title" value="{{ lesson.title }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label>رقم الترتيب:</label>
+                        <input type="number" name="lesson_order" value="{{ lesson.lesson_order or 0 }}" required>
+                    </div>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>رابط الفيديو:</label>
+                        <input type="url" name="video_url" value="{{ lesson.video_url }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label>رابط ملف الـ PDF (اختياري):</label>
+                        <input type="url" name="pdf_url" value="{{ lesson.pdf_url or '' }}">
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-submit">حفظ التعديلات 💾</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
