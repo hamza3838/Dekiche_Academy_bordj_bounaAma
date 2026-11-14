@@ -104,7 +104,7 @@ def student_dashboard():
                 m_val = sub.get('month') or sub.get('code_month')
                 
                 if g_val and sub_val and m_val:
-                    # جلب الدروس مرتبة حسب الترتيب (lesson_order) تنازلياً أو تصاعدياً
+                    # جلب الدروس مرتبة حسب الترتيب (lesson_order)
                     l_res = supabase.table('lessons').select('*').eq('school_year', g_val).eq('subject', sub_val).eq('month', str(m_val)).order('lesson_order', desc=False).execute()
                     if l_res and l_res.data:
                         lessons.extend(l_res.data)
@@ -166,13 +166,13 @@ def teacher_dashboard():
     if request.method == 'POST':
         school_year = request.form.get('school_year')
         subject = request.form.get('subject')
+        unit = request.form.get('unit')  # المقطع التعليمي الجديد
         month = request.form.get('month')
         week = request.form.get('week')
         title = request.form.get('title')
         video_url = request.form.get('video_url')
         pdf_url = request.form.get('pdf_url')
         
-        # إضافة دعم ترتيب الدرس (lesson_order) افتراضياً 0
         try:
             lesson_order = int(request.form.get('lesson_order', 0))
         except ValueError:
@@ -182,6 +182,7 @@ def teacher_dashboard():
             supabase.table('lessons').insert({
                 'school_year': school_year,
                 'subject': subject,
+                'unit': unit,  # حفظ المقطع في قاعدة البيانات
                 'month': month,
                 'week': week,
                 'title': title,
@@ -189,13 +190,12 @@ def teacher_dashboard():
                 'pdf_url': pdf_url,
                 'lesson_order': lesson_order
             }).execute()
-            flash("تم إضافة الدرس بنجاح!", "success")
+            flash("تم إضافة الدرس ضمن المقطع بنجاح!", "success")
         except Exception as e:
             flash(f"خطأ أثناء إضافة الدرس: {e}", "danger")
 
     lessons_data = []
     try:
-        # جلب الدروس مرتبة حسب الترتيب (lesson_order)
         lessons_res = supabase.table('lessons').select('*').order('lesson_order', desc=False).execute()
         if lessons_res and lessons_res.data:
             lessons_data = lessons_res.data
@@ -242,19 +242,16 @@ def admin_panel():
         subject = request.form.get('subject')
         month = request.form.get('month')
 
-        # قراءة العدد المطلوب توليده دفعة واحدة (افتراضياً 1)
         try:
             count = int(request.form.get('count', 1))
             if count < 1: count = 1
-            if count > 50: count = 50  # حد أقصى في الدفعة الواحدة للأمان
+            if count > 50: count = 50
         except ValueError:
             count = 1
 
-        # تحديد تاريخ انتهاء افتراضي (بعد سنة من الآن) لتجنب خطأ expires_at
         future_date = (datetime.datetime.now() + datetime.timedelta(days=365)).strftime('%Y-%m-%d %H:%M:%S')
 
         try:
-            # حروف وأرقام فقط بدون شرطات أو رموز لتسهيل كتابتها على التلاميذ
             characters = string.ascii_uppercase + string.digits
             
             for _ in range(count):
@@ -317,11 +314,9 @@ def delete_selected_codes():
 
     try:
         if action_type == 'all':
-            # حذف كافة الأكواد في القاعدة
             supabase.table('access_codes').delete().gt('id', 0).execute()
             flash("تم حذف كافة الأكواد بنجاح!", "success")
         elif selected_ids:
-            # حذف الأكواد المحددة فقط
             for code_id in selected_ids:
                 supabase.table('access_codes').delete().eq('id', int(code_id)).execute()
             flash(f"تم حذف {len(selected_ids)} كود بنجاح!", "success")
