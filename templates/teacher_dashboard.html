@@ -164,6 +164,22 @@
                         </select>
                     </div>
 
+                    <!-- اختيار المقطع التعليمي -->
+                    <div class="form-group">
+                        <label>المقطع التعليمي:</label>
+                        <select name="unit" required>
+                            <option value="">اختر المقطع...</option>
+                            <option value="المقطع الأول">المقطع الأول</option>
+                            <option value="المقطع الثاني">المقطع الثاني</option>
+                            <option value="المقطع الثالث">المقطع الثالث</option>
+                            <option value="المقطع الرابع">المقطع الرابع</option>
+                            <option value="المقطع الخامس">المقطع الخامس</option>
+                            <option value="المقطع السادس">المقطع السادس</option>
+                            <option value="المقطع السابع">المقطع السابع</option>
+                            <option value="المقطع الثامن">المقطع الثامن</option>
+                        </select>
+                    </div>
+
                     <div class="form-group">
                         <label>الشهر:</label>
                         <select name="month" required>
@@ -225,6 +241,7 @@
                             <th>الترتيب</th>
                             <th>السنة الدراسية</th>
                             <th>المادة</th>
+                            <th>المقطع</th>
                             <th>الشهر / الأسبوع</th>
                             <th>عنوان الدرس</th>
                             <th>رابط الفيديو</th>
@@ -239,6 +256,7 @@
                                     <td>{{ lesson.lesson_order }}</td>
                                     <td>{{ lesson.school_year }}</td>
                                     <td>{{ lesson.subject }}</td>
+                                    <td>{{ lesson.unit or '-' }}</td>
                                     <td>{{ lesson.month }} - {{ lesson.week }}</td>
                                     <td>{{ lesson.title }}</td>
                                     <td>
@@ -264,7 +282,7 @@
                             {% endfor %}
                         {% else %}
                             <tr>
-                                <td colspan="8" class="empty-row">لا توجد دروس مضافة حالياً.</td>
+                                <td colspan="9" class="empty-row">لا توجد دروس مضافة حالياً.</td>
                             </tr>
                         {% endif %}
                     </tbody>
