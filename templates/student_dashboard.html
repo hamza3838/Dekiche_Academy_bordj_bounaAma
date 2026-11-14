@@ -36,6 +36,10 @@
         .subscriptions-container { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
         .sub-badge { background: rgba(233, 189, 104, 0.15); border: 1px solid rgba(233, 189, 104, 0.3); padding: 8px 14px; border-radius: 10px; font-weight: 600; color: #e9bd68; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; }
 
+        /* تصميم صندوق المقطع التعليمي */
+        .unit-section { background: rgba(124, 58, 237, 0.08); border: 1px solid rgba(124, 58, 237, 0.3); border-radius: 16px; padding: 20px; margin-bottom: 25px; }
+        .unit-title { color: #e9bd68; font-size: 18px; font-weight: 700; border-bottom: 1px solid rgba(233, 189, 104, 0.2); padding-bottom: 10px; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
+
         /* بطاقة الدرس */
         .lesson-item { background: #1e293b; border: 1px solid rgba(124, 58, 237, 0.3); border-radius: 16px; padding: 15px; margin-bottom: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
         .lesson-meta { font-size: 12px; background: #7c3aed; color: white; padding: 4px 10px; border-radius: 6px; display: inline-block; font-weight: 600; margin-bottom: 10px; }
@@ -75,7 +79,7 @@
             border: 0;
         }
         
-        /* طبقة حماية الزاوية اليمنى (تم توسيع العرض لتغطية شعار يوتيوب بالكامل بدقة) */
+        /* طبقة حماية الزاوية اليمنى (تغطية شعار يوتيوب) */
         .video-container::after {
             content: "";
             position: absolute;
@@ -129,7 +133,7 @@
         <div class="card">
             <h3 style="border-bottom: none; margin-bottom: 12px;">🎟️ تفعيل اشتراك شهر جديد</h3>
             <form action="{{ url_for('redeem_code') }}" method="POST" class="redeem-form">
-                <input type="text" name="code" placeholder="أدخل كود التفعيل الجديد هنا (مثال: DAQ-XXXXXX)" required>
+                <input type="text" name="code" placeholder="أدخل كود التفعيل الجديد هنا (أحرف وأرقام)" required>
                 <button type="submit" class="btn-redeem">تفعيل الكود</button>
             </form>
         </div>
@@ -150,43 +154,50 @@
             </div>
         </div>
 
-        <!-- قائمة الدروس -->
+        <!-- قائمة الدروس (منظمة حسب المقاطع) -->
         <div class="card">
-            <h2>📖 الدروس الخاصة بك</h2>
+            <h2>📖 الدروس الخاصة بك (منظمة حسب المقاطع)</h2>
             {% if lessons %}
-                {% for lesson in lessons %}
-                    <div class="lesson-item">
-                        <span class="lesson-meta">{{ lesson.school_year }} | {{ lesson.subject }} | {{ lesson.month }} | {{ lesson.week }}</span>
+                {% set grouped_lessons = lessons | groupby('unit') %}
+                {% for unit, unit_lessons in grouped_lessons %}
+                    <div class="unit-section">
+                        <h3 class="unit-title">📁 {{ unit if unit else 'دروس عامة' }}</h3>
                         
-                        <!-- صف العنوان مع التنبيه الجانبي لقلب الهاتف -->
-                        <div class="lesson-header-row">
-                            <h4 class="lesson-title">{{ lesson.title }}</h4>
-                            <span class="rotate-tip">📱 اقلب هاتفك أفقياً لمشاهدة أفضل</span>
-                        </div>
-                        
-                        {% if lesson.video_url %}
-                            <div class="lesson-player-box">
-                                {% set v_url = lesson.video_url %}
-                                {% if "youtu.be/" in v_url %}
-                                    {% set embed_url = "https://www.youtube.com/embed/" + v_url.split("youtu.be/")[1].split("?")[0] %}
-                                {% elif "watch?v=" in v_url %}
-                                    {% set embed_url = "https://www.youtube.com/embed/" + v_url.split("watch?v=")[1].split("&")[0] %}
-                                {% else %}
-                                    {% set embed_url = v_url %}
+                        {% for lesson in unit_lessons %}
+                            <div class="lesson-item">
+                                <span class="lesson-meta">{{ lesson.school_year }} | {{ lesson.subject }} | الشهر: {{ lesson.month }} | {{ lesson.week }}</span>
+                                
+                                <!-- صف العنوان مع التنبيه الجانبي لقلب الهاتف -->
+                                <div class="lesson-header-row">
+                                    <h4 class="lesson-title">{{ lesson.title }}</h4>
+                                    <span class="rotate-tip">📱 اقلب هاتفك أفقياً لمشاهدة أفضل</span>
+                                </div>
+                                
+                                {% if lesson.video_url %}
+                                    <div class="lesson-player-box">
+                                        {% set v_url = lesson.video_url %}
+                                        {% if "youtu.be/" in v_url %}
+                                            {% set embed_url = "https://www.youtube.com/embed/" + v_url.split("youtu.be/")[1].split("?")[0] %}
+                                        {% elif "watch?v=" in v_url %}
+                                            {% set embed_url = "https://www.youtube.com/embed/" + v_url.split("watch?v=")[1].split("&")[0] %}
+                                        {% else %}
+                                            {% set embed_url = v_url %}
+                                        {% endif %}
+
+                                        <!-- مشغل فيديو يملأ العرض بالكامل مع درع حماية واسع ومحكم -->
+                                        <div class="video-container">
+                                            <iframe src="{{ embed_url }}?rel=0&modestbranding=1&controls=1&showinfo=0&iv_load_policy=3&disablekb=1&fs=0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
+                                        </div>
+                                    </div>
                                 {% endif %}
 
-                                <!-- مشغل فيديو يملأ العرض بالكامل مع درع حماية واسع ومحكم -->
-                                <div class="video-container">
-                                    <iframe src="{{ embed_url }}?rel=0&modestbranding=1&controls=1&showinfo=0&iv_load_policy=3&disablekb=1&fs=0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
-                                </div>
+                                {% if lesson.pdf_url %}
+                                    <div>
+                                        <a href="{{ lesson.pdf_url }}" target="_blank" class="pdf-btn">📄 تحميل ملف الدرس (PDF)</a>
+                                    </div>
+                                {% endif %}
                             </div>
-                        {% endif %}
-
-                        {% if lesson.pdf_url %}
-                            <div>
-                                <a href="{{ lesson.pdf_url }}" target="_blank" class="pdf-btn">📄 تحميل ملف الدرس (PDF)</a>
-                            </div>
-                        {% endif %}
+                        {% endfor %}
                     </div>
                 {% endfor %}
             {% else %}
