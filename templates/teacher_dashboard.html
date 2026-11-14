@@ -38,6 +38,8 @@
         a.link-val:hover { text-decoration: underline; }
         .btn-delete { background: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px; transition: 0.2s; }
         .btn-delete:hover { background: #dc2626; }
+        .btn-edit { background: #38bdf8; color: #0f172a; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 13px; display: inline-block; margin-left: 5px; }
+        .btn-edit:hover { filter: brightness(1.1); }
     </style>
 
     <script>
@@ -54,7 +56,6 @@
             subjectSelect.innerHTML = '<option value="">اختر المادة...</option>';
             
             if (selectedCycle === 'الابتدائي') {
-                // سنوات الابتدائي
                 const primaryGrades = [
                     "السنة الأولى ابتدائي",
                     "السنة الثانية ابتدائي",
@@ -69,7 +70,6 @@
                     gradeSelect.appendChild(opt);
                 });
 
-                // مواد الابتدائي (اللغة العربية، الرياضيات، الفرنسية، الإنجليزية فقط)
                 const primarySubjects = [
                     "اللغة العربية",
                     "الرياضيات",
@@ -84,7 +84,6 @@
                 });
 
             } else if (selectedCycle === 'المتوسط') {
-                // سنوات المتوسط
                 const middleGrades = [
                     "السنة الأولى متوسط",
                     "السنة الثانية متوسط",
@@ -98,7 +97,6 @@
                     gradeSelect.appendChild(opt);
                 });
 
-                // مواد المتوسط
                 const middleSubjects = [
                     "اللغة العربية",
                     "الرياضيات",
@@ -138,7 +136,7 @@
             <h2>إضافة درس جديد</h2>
             <form method="POST">
                 <div class="form-grid">
-                    <!-- اختيار الطور أولاً (سيقوم بتحديث السنوات والمواد معاً تلقائياً) -->
+                    <!-- اختيار الطور أولاً -->
                     <div class="form-group">
                         <label>الطور التعليمي:</label>
                         <select id="cycleSelect" onchange="updateCycleData()" required>
@@ -148,7 +146,7 @@
                         </select>
                     </div>
 
-                    <!-- اختيار السنة الدراسية بناءً على الطور -->
+                    <!-- اختيار السنة الدراسية -->
                     <div class="form-group">
                         <label>السن الدراسي:</label>
                         <select name="school_year" id="gradeSelect" required>
@@ -156,7 +154,7 @@
                         </select>
                     </div>
 
-                    <!-- اختيار المادة بناءً على الطور -->
+                    <!-- اختيار المادة -->
                     <div class="form-group">
                         <label>المادة:</label>
                         <select name="subject" id="subjectSelect" required>
@@ -180,20 +178,21 @@
                         </select>
                     </div>
 
+                    <!-- الشهر بنظام الأرقام -->
                     <div class="form-group">
-                        <label>الشهر:</label>
+                        <label>الشهر (الوحدة الزمنية):</label>
                         <select name="month" required>
-                            <option value="سبتمبر">سبتمبر</option>
-                            <option value="أكتوبر">أكتوبر</option>
-                            <option value="نوفمبر">نوفمبر</option>
-                            <option value="ديسمبر">ديسمبر</option>
-                            <option value="جانفي">جانفي</option>
-                            <option value="فيفري">فيفري</option>
-                            <option value="مارس">مارس</option>
-                            <option value="أفريل">أفريل</option>
-                            <option value="ماي">ماي</option>
+                            <option value="الشهر 1">الشهر 1</option>
+                            <option value="الشهر 2">الشهر 2</option>
+                            <option value="الشهر 3">الشهر 3</option>
+                            <option value="الشهر 4">الشهر 4</option>
+                            <option value="الشهر 5">الشهر 5</option>
+                            <option value="الشهر 6">الشهر 6</option>
+                            <option value="الشهر 7">الشهر 7</option>
+                            <option value="الشهر 8">الشهر 8</option>
                         </select>
                     </div>
+
                     <div class="form-group">
                         <label>الأسبوع:</label>
                         <select name="week" required>
@@ -274,6 +273,10 @@
                                         {% endif %}
                                     </td>
                                     <td>
+                                        <!-- زر التعديل الجديد -->
+                                        <a href="{{ url_for('edit_lesson', lesson_id=lesson.id) }}" class="btn-edit">تعديل</a>
+                                        
+                                        <!-- زر الحذف -->
                                         <form action="{{ url_for('delete_lesson', lesson_id=lesson.id) }}" method="POST" onsubmit="return confirm('هل أنت متأكد من حذف هذا الدرس؟');" style="display:inline;">
                                             <button type="submit" class="btn-delete">حذف</button>
                                         </form>
