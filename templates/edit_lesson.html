@@ -20,6 +20,49 @@
         .btn-back { display: inline-block; background: #334155; color: #f8fafc; padding: 8px 16px; border-radius: 8px; text-decoration: none; font-size: 14px; margin-bottom: 15px; font-weight: 600; }
         .btn-back:hover { background: #475569; }
     </style>
+
+    <script>
+        function handleEditSubjectChange() {
+            const subjectSelect = document.getElementById('editSubjectSelect');
+            const unitLabel = document.getElementById('editUnitLabel');
+            const unitSelect = document.getElementById('editUnitSelect');
+            const weekGroup = document.getElementById('editWeekGroup');
+
+            const currentUnit = "{{ lesson.unit }}";
+
+            if (subjectSelect.value === 'الرياضيات') {
+                unitLabel.textContent = "الوضعية الانطلاقية:";
+                unitSelect.innerHTML = `
+                    <option value="الوضعية الانطلاقية 1" ${currentUnit === 'الوضعية الانطلاقية 1' ? 'selected' : ''}>الوضعية الانطلاقية 1</option>
+                    <option value="الوضعية الانطلاقية 2" ${currentUnit === 'الوضعية الانطلاقية 2' ? 'selected' : ''}>الوضعية الانطلاقية 2</option>
+                    <option value="الوضعية الانطلاقية 3" ${currentUnit === 'الوضعية الانطلاقية 3' ? 'selected' : ''}>الوضعية الانطلاقية 3</option>
+                    <option value="الوضعية الانطلاقية 4" ${currentUnit === 'الوضعية الانطلاقية 4' ? 'selected' : ''}>الوضعية الانطلاقية 4</option>
+                    <option value="الوضعية الانطلاقية 5" ${currentUnit === 'الوضعية الانطلاقية 5' ? 'selected' : ''}>الوضعية الانطلاقية 5</option>
+                    <option value="الوضعية الانطلاقية 6" ${currentUnit === 'الوضعية الانطلاقية 6' ? 'selected' : ''}>الوضعية الانطلاقية 6</option>
+                `;
+                weekGroup.style.display = 'none';
+                document.getElementById('editWeekSelect').required = false;
+            } else {
+                unitLabel.textContent = "المقطع التعليمي:";
+                unitSelect.innerHTML = `
+                    <option value="المقطع الأول" ${currentUnit === 'المقطع الأول' ? 'selected' : ''}>المقطع الأول</option>
+                    <option value="المقطع الثاني" ${currentUnit === 'المقطع الثاني' ? 'selected' : ''}>المقطع الثاني</option>
+                    <option value="المقطع الثالث" ${currentUnit === 'المقطع الثالث' ? 'selected' : ''}>المقطع الثالث</option>
+                    <option value="المقطع الرابع" ${currentUnit === 'المقطع الرابع' ? 'selected' : ''}>المقطع الرابع</option>
+                    <option value="المقطع الخامس" ${currentUnit === 'المقطع الخامس' ? 'selected' : ''}>المقطع الخامس</option>
+                    <option value="المقطع السادس" ${currentUnit === 'المقطع السادس' ? 'selected' : ''}>المقطع السادس</option>
+                    <option value="المقطع السابع" ${currentUnit === 'المقطع السابع' ? 'selected' : ''}>المقطع السابع</option>
+                    <option value="المقطع الثامن" ${currentUnit === 'المقطع الثامن' ? 'selected' : ''}>المقطع الثامن</option>
+                `;
+                weekGroup.style.display = 'block';
+                document.getElementById('editWeekSelect').required = true;
+            }
+        }
+
+        window.onload = function() {
+            handleEditSubjectChange();
+        };
+    </script>
 </head>
 <body>
     <div class="wrapper">
@@ -28,7 +71,7 @@
         </div>
 
         <div class="card">
-            <h2>✏️ تعديل بيانات الدرس</h2>
+            <h2>✏️ تعديل بيانات الدرس أو ورقة التمارين</h2>
             <form method="POST">
                 <div class="form-grid">
                     <div class="form-group">
@@ -40,45 +83,50 @@
                             <option value="السنة الرابعة ابتدائي" {% if lesson.school_year == 'السنة الرابعة ابتدائي' %}selected{% endif %}>السنة الرابعة ابتدائي</option>
                             <option value="السنة الخامسة ابتدائي" {% if lesson.school_year == 'السنة الخامسة ابتدائي' %}selected{% endif %}>السنة الخامسة ابتدائي</option>
                             <option value="السنة الأولى متوسط" {% if lesson.school_year == 'السنة الأولى متوسط' %}selected{% endif %}>السنة الأولى متوسط</option>
+                            <option value="السنة الثانية متوسط" {% if lesson.school_year == 'السنة الثانية متوسط' %}selected{% endif %}>السنة الثانية متوسط</option>
+                            <option value="السنة الثالثة متوسط" {% if lesson.school_year == 'السنة الثالثة متوسط' %}selected{% endif %}>السنة الثالثة متوسط</option>
+                            <option value="السنة الرابعة متوسط" {% if lesson.school_year == 'السنة الرابعة متوسط' %}selected{% endif %}>السنة الرابعة متوسط</option>
                         </select>
                     </div>
 
                     <div class="form-group">
                         <label>المادة:</label>
-                        <select name="subject" required>
+                        <select name="subject" id="editSubjectSelect" onchange="handleEditSubjectChange()" required>
                             <option value="اللغة العربية" {% if lesson.subject == 'اللغة العربية' %}selected{% endif %}>اللغة العربية</option>
                             <option value="الرياضيات" {% if lesson.subject == 'الرياضيات' %}selected{% endif %}>الرياضيات</option>
                             <option value="الفرنسية" {% if lesson.subject == 'الفرنسية' %}selected{% endif %}>الفرنسية</option>
                             <option value="الإنجليزية" {% if lesson.subject == 'الإنجليزية' %}selected{% endif %}>الإنجليزية</option>
+                            <option value="الفيزياء (العلوم الفيزيائية)" {% if lesson.subject == 'الفيزياء (العلوم الفيزيائية)' %}selected{% endif %}>الفيزياء (العلوم الفيزيائية)</option>
+                            <option value="العلوم الطبيعية" {% if lesson.subject == 'العلوم الطبيعية' %}selected{% endif %}>العلوم الطبيعية</option>
+                            <option value="الاجتماعيات" {% if lesson.subject == 'الاجتماعيات' %}selected{% endif %}>الاجتماعيات</option>
+                            <option value="التربية الإسلامية" {% if lesson.subject == 'التربية الإسلامية' %}selected{% endif %}>التربية الإسلامية</option>
                         </select>
                     </div>
 
                     <div class="form-group">
-                        <label>المقطع التعليمي:</label>
-                        <select name="unit" required>
-                            <option value="المقطع الأول" {% if lesson.unit == 'المقطع الأول' %}selected{% endif %}>المقطع الأول</option>
-                            <option value="المقطع الثاني" {% if lesson.unit == 'المقطع الثاني' %}selected{% endif %}>المقطع الثاني</option>
-                            <option value="المقطع الثالث" {% if lesson.unit == 'المقطع الثالث' %}selected{% endif %}>المقطع الثالث</option>
-                            <option value="المقطع الرابع" {% if lesson.unit == 'المقطع الرابع' %}selected{% endif %}>المقطع الرابع</option>
-                            <option value="المقطع الخامس" {% if lesson.unit == 'المقطع الخامس' %}selected{% endif %}>المقطع الخامس</option>
-                            <option value="المقطع السادس" {% if lesson.unit == 'المقطع السادس' %}selected{% endif %}>المقطع السادس</option>
-                            <option value="المقطع السابع" {% if lesson.unit == 'المقطع السابع' %}selected{% endif %}>المقطع السابع</option>
-                            <option value="المقطع الثامن" {% if lesson.unit == 'المقطع الثامن' %}selected{% endif %}>المقطع الثامن</option>
+                        <label id="editUnitLabel">المقطع التعليمي / الوضعية:</label>
+                        <select name="unit" id="editUnitSelect" required>
+                            <!-- يتم تعبئتها تلقائياً عبر الجافاسكريبت حسب المادة -->
                         </select>
                     </div>
 
                     <div class="form-group">
                         <label>الشهر:</label>
                         <select name="month" required>
-                            {% for i in range(1, 9) %}
-                                <option value="الشهر {{ i }}" {% if lesson.month == 'الشهر ' ~ i %}selected{% endif %}>الشهر {{ i }}</option>
-                            {% endfor %}
+                            <option value="الشهر 1" {% if lesson.month == 'الشهر 1' %}selected{% endif %}>الشهر 1</option>
+                            <option value="الشهر 2" {% if lesson.month == 'الشهر 2' %}selected{% endif %}>الشهر 2</option>
+                            <option value="الشهر 3" {% if lesson.month == 'الشهر 3' %}selected{% endif %}>الشهر 3</option>
+                            <option value="الشهر 4" {% if lesson.month == 'الشهر 4' %}selected{% endif %}>الشهر 4</option>
+                            <option value="الشهر 5" {% if lesson.month == 'الشهر 5' %}selected{% endif %}>الشهر 5</option>
+                            <option value="الشهر 6" {% if lesson.month == 'الشهر 6' %}selected{% endif %}>الشهر 6</option>
+                            <option value="الشهر 7" {% if lesson.month == 'الشهر 7' %}selected{% endif %}>الشهر 7</option>
+                            <option value="الشهر 8" {% if lesson.month == 'الشهر 8' %}selected{% endif %}>الشهر 8</option>
                         </select>
                     </div>
 
-                    <div class="form-group">
+                    <div class="form-group" id="editWeekGroup">
                         <label>الأسبوع:</label>
-                        <select name="week" required>
+                        <select name="week" id="editWeekSelect" required>
                             <option value="الأسبوع الأول" {% if lesson.week == 'الأسبوع الأول' %}selected{% endif %}>الأسبوع الأول</option>
                             <option value="الأسبوع الثاني" {% if lesson.week == 'الأسبوع الثاني' %}selected{% endif %}>الأسبوع الثاني</option>
                             <option value="الأسبوع الثالث" {% if lesson.week == 'الأسبوع الثالث' %}selected{% endif %}>الأسبوع الثالث</option>
@@ -93,8 +141,8 @@
                         <input type="text" name="title" value="{{ lesson.title }}" required>
                     </div>
                     <div class="form-group">
-                        <label>رقم الترتيب:</label>
-                        <input type="number" name="lesson_order" value="{{ lesson.lesson_order or 0 }}" required>
+                        <label>رقم الترتيب (1 إلى 25):</label>
+                        <input type="number" name="lesson_order" value="{{ lesson.lesson_order or 1 }}" required>
                     </div>
                 </div>
 
@@ -104,7 +152,7 @@
                         <input type="url" name="video_url" value="{{ lesson.video_url }}" required>
                     </div>
                     <div class="form-group">
-                        <label>رابط ملف الـ PDF (اختياري):</label>
+                        <label>رابط ملف التمارين PDF (اختياري):</label>
                         <input type="url" name="pdf_url" value="{{ lesson.pdf_url or '' }}">
                     </div>
                 </div>
