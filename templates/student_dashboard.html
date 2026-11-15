@@ -36,78 +36,32 @@
         .subscriptions-container { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
         .sub-badge { background: rgba(233, 189, 104, 0.15); border: 1px solid rgba(233, 189, 104, 0.3); padding: 8px 14px; border-radius: 10px; font-weight: 600; color: #e9bd68; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; }
 
-        /* تصميم صندوق المقطع التعليمي */
-        .unit-section { background: rgba(124, 58, 237, 0.08); border: 1px solid rgba(124, 58, 237, 0.3); border-radius: 16px; padding: 20px; margin-bottom: 25px; }
-        .unit-title { color: #e9bd68; font-size: 18px; font-weight: 700; border-bottom: 1px solid rgba(233, 189, 104, 0.2); padding-bottom: 10px; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
+        /* تصاميم الأقسام (المقاطع والوضعيات والأسابيع) */
+        .section-box { background: rgba(124, 58, 237, 0.08); border: 1px solid rgba(124, 58, 237, 0.3); border-radius: 16px; padding: 20px; margin-bottom: 25px; }
+        .section-title { color: #e9bd68; font-size: 18px; font-weight: 700; border-bottom: 1px solid rgba(233, 189, 104, 0.2); padding-bottom: 10px; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
+
+        .week-box { background: rgba(15, 23, 42, 0.5); border: 1px solid #334155; border-radius: 12px; padding: 15px; margin-bottom: 15px; }
+        .week-title { color: #38bdf8; font-size: 16px; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
 
         /* بطاقة الدرس */
-        .lesson-item { background: #1e293b; border: 1px solid rgba(124, 58, 237, 0.3); border-radius: 16px; padding: 15px; margin-bottom: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+        .lesson-item { background: #1e293b; border: 1px solid rgba(124, 58, 237, 0.3); border-radius: 16px; padding: 15px; margin-bottom: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
         .lesson-meta { font-size: 12px; background: #7c3aed; color: white; padding: 4px 10px; border-radius: 6px; display: inline-block; font-weight: 600; margin-bottom: 10px; }
         
-        /* صف العنوان مع التنبيه الجانبي لقلب الهاتف */
         .lesson-header-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; }
         .lesson-title { font-size: 17px; color: #f8fafc; font-weight: 700; }
         
-        /* تنسيق عبارة قلب الهاتف الجانبية */
         .rotate-tip { background: rgba(233, 189, 104, 0.1); border: 1px solid rgba(233, 189, 104, 0.3); color: #e9bd68; padding: 5px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; }
 
-        /* صندوق مشغل الفيديو */
-        .lesson-player-box {
-            background: #0f172a;
-            border: 1px solid #7c3aed;
-            padding: 0;
-            border-radius: 12px;
-            overflow: hidden;
-            margin: 10px 0;
-        }
+        /* مشغل الفيديو وحمايته */
+        .lesson-player-box { background: #0f172a; border: 1px solid #7c3aed; padding: 0; border-radius: 12px; overflow: hidden; margin: 10px 0; }
+        .video-container { position: relative; width: 100%; padding-bottom: 56.25%; height: 0; background: #000; }
+        .video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
+        .video-container::after { content: ""; position: absolute; bottom: 0; right: 0; width: 220px; height: 60px; background: transparent; z-index: 2147483647; pointer-events: auto; }
+        .video-container::before { content: ""; position: absolute; bottom: 0; left: 0; width: 180px; height: 60px; background: transparent; z-index: 2147483647; pointer-events: auto; }
 
-        /* حاوية الفيديو مع دروع حماية موسعة تغطي يوتيوب والمشاركة تماماً */
-        .video-container {
-            position: relative;
-            width: 100%;
-            padding-bottom: 56.25%; /* نسبة الأبعاد 16:9 القياسية */
-            height: 0;
-            background: #000;
-        }
-        
-        .video-container iframe {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            border: 0;
-        }
-        
-        /* طبقة حماية الزاوية اليمنى (تغطية شعار يوتيوب) */
-        .video-container::after {
-            content: "";
-            position: absolute;
-            bottom: 0;
-            right: 0;
-            width: 220px;
-            height: 60px;
-            background: transparent;
-            z-index: 2147483647;
-            pointer-events: auto;
-        }
-
-        /* طبقة حماية الزاوية اليسرى (تغطية زر المشاركة) */
-        .video-container::before {
-            content: "";
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 180px;
-            height: 60px;
-            background: transparent;
-            z-index: 2147483647;
-            pointer-events: auto;
-        }
-
-        /* زر تحميل ملف PDF */
-        .pdf-btn { display: inline-flex; align-items: center; gap: 8px; color: #38bdf8; text-decoration: none; font-weight: 600; font-size: 14px; background: rgba(56, 189, 248, 0.1); padding: 10px 16px; border-radius: 10px; border: 1px solid rgba(56, 189, 248, 0.2); transition: 0.2s; margin-top: 10px; }
-        .pdf-btn:hover { background: rgba(56, 189, 248, 0.2); }
+        /* زر تحميل ملف PDF للتمارين */
+        .pdf-btn { display: inline-flex; align-items: center; gap: 8px; color: #10b981; text-decoration: none; font-weight: 700; font-size: 14px; background: rgba(16, 185, 129, 0.1); padding: 10px 16px; border-radius: 10px; border: 1px solid rgba(16, 185, 129, 0.3); transition: 0.2s; margin-top: 10px; }
+        .pdf-btn:hover { background: rgba(16, 185, 129, 0.2); color: #fff; }
 
         .empty-lessons { text-align: center; color: #94a3b8; padding: 40px; font-size: 15px; }
     </style>
@@ -140,7 +94,7 @@
 
         <!-- الاشتراكات النشطة -->
         <div class="card">
-            <h3>📚 اشتراكاتك النشطة (مفتوحة لك دائماً):</h3>
+            <h3>📚 اشتراكاتك النشطة:</h3>
             <div class="subscriptions-container">
                 {% if subscriptions %}
                     {% for sub in subscriptions %}
@@ -154,50 +108,93 @@
             </div>
         </div>
 
-        <!-- قائمة الدروس (منظمة حسب المقاطع) -->
+        <!-- قائمة الدروس المنظمة تلقائياً حسب المادة -->
         <div class="card">
-            <h2>📖 الدروس الخاصة بك (منظمة حسب المقاطع)</h2>
-            {% if lessons %}
-                {% set grouped_lessons = lessons | groupby('unit') %}
-                {% for unit, unit_lessons in grouped_lessons %}
-                    <div class="unit-section">
-                        <h3 class="unit-title">📁 {{ unit if unit else 'دروس عامة' }}</h3>
-                        
-                        {% for lesson in unit_lessons %}
-                            <div class="lesson-item">
-                                <span class="lesson-meta">{{ lesson.school_year }} | {{ lesson.subject }} | الشهر: {{ lesson.month }} | {{ lesson.week }}</span>
-                                
-                                <!-- صف العنوان مع التنبيه الجانبي لقلب الهاتف -->
-                                <div class="lesson-header-row">
-                                    <h4 class="lesson-title">{{ lesson.title }}</h4>
-                                    <span class="rotate-tip">📱 اقلب هاتفك أفقياً لمشاهدة أفضل</span>
-                                </div>
-                                
-                                {% if lesson.video_url %}
-                                    <div class="lesson-player-box">
-                                        {% set v_url = lesson.video_url %}
-                                        {% if "youtu.be/" in v_url %}
-                                            {% set embed_url = "https://www.youtube.com/embed/" + v_url.split("youtu.be/")[1].split("?")[0] %}
-                                        {% elif "watch?v=" in v_url %}
-                                            {% set embed_url = "https://www.youtube.com/embed/" + v_url.split("watch?v=")[1].split("&")[0] %}
-                                        {% else %}
-                                            {% set embed_url = v_url %}
-                                        {% endif %}
+            <h2>📖 محتوى الدروس وأوراق التمارين</h2>
+            
+            {% if organized_data %}
+                {% for main_key, second_level in organized_data.items() %}
+                    <div class="section-box">
+                        <h3 class="section-title">📂 {{ main_key }}</h3>
 
-                                        <!-- مشغل فيديو يملأ العرض بالكامل مع درع حماية واسع ومحكم -->
-                                        <div class="video-container">
-                                            <iframe src="{{ embed_url }}?rel=0&modestbranding=1&controls=1&showinfo=0&iv_load_policy=3&disablekb=1&fs=0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
+                        {% if subscriptions and subscriptions[0].get('subject') == 'الرياضيات' %}
+                            <!-- عرض الرياضيات: قائمة الدروس تحت الوضعية الانطلاقية مرتبة حسب lesson_order -->
+                            {% for lesson in second_level %}
+                                <div class="lesson-item">
+                                    <span class="lesson-meta">ترتيب الدرس: {{ lesson.lesson_order or loop.index }} | الشهر: {{ lesson.month }}</span>
+                                    
+                                    <div class="lesson-header-row">
+                                        <h4 class="lesson-title">{{ lesson.title }}</h4>
+                                        <span class="rotate-tip">📱 اقلب هاتفك أفقياً لمشاهدة أفضل</span>
+                                    </div>
+                                    
+                                    {% if lesson.video_url %}
+                                        <div class="lesson-player-box">
+                                            {% set v_url = lesson.video_url %}
+                                            {% if "youtu.be/" in v_url %}
+                                                {% set embed_url = "https://www.youtube.com/embed/" + v_url.split("youtu.be/")[1].split("?")[0] %}
+                                            {% elif "watch?v=" in v_url %}
+                                                {% set embed_url = "https://www.youtube.com/embed/" + v_url.split("watch?v=")[1].split("&")[0] %}
+                                            {% else %}
+                                                {% set embed_url = v_url %}
+                                            {% endif %}
+
+                                            <div class="video-container">
+                                                <iframe src="{{ embed_url }}?rel=0&modestbranding=1&controls=1&showinfo=0&iv_load_policy=3&disablekb=1&fs=0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
+                                            </div>
                                         </div>
-                                    </div>
-                                {% endif %}
+                                    {% endif %}
 
-                                {% if lesson.pdf_url %}
-                                    <div>
-                                        <a href="{{ lesson.pdf_url }}" target="_blank" class="pdf-btn">📄 تحميل ملف الدرس (PDF)</a>
-                                    </div>
-                                {% endif %}
-                            </div>
-                        {% endfor %}
+                                    {% if lesson.pdf_url %}
+                                        <div>
+                                            <a href="{{ lesson.pdf_url }}" target="_blank" class="pdf-btn">📄 تحميل ورقة التمارين (PDF)</a>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+
+                        {% else %}
+                            <!-- عرض اللغة العربية وبقية المواد: مقاطع ثم أسابيع -->
+                            {% for week, lessons_list in second_level.items() %}
+                                <div class="week-box">
+                                    <div class="week-title">📅 {{ week }}</div>
+                                    
+                                    {% for lesson in lessons_list %}
+                                        <div class="lesson-item" style="background: #0f172a; margin-bottom: 10px;">
+                                            <span class="lesson-meta">{{ lesson.subject }} | الشهر: {{ lesson.month }}</span>
+                                            
+                                            <div class="lesson-header-row">
+                                                <h4 class="lesson-title">{{ lesson.title }}</h4>
+                                                <span class="rotate-tip">📱 اقلب هاتفك أفقياً لمشاهدة أفضل</span>
+                                            </div>
+                                            
+                                            {% if lesson.video_url %}
+                                                <div class="lesson-player-box">
+                                                    {% set v_url = lesson.video_url %}
+                                                    {% if "youtu.be/" in v_url %}
+                                                        {% set embed_url = "https://www.youtube.com/embed/" + v_url.split("youtu.be/")[1].split("?")[0] %}
+                                                    {% elif "watch?v=" in v_url %}
+                                                        {% set embed_url = "https://www.youtube.com/embed/" + v_url.split("watch?v=")[1].split("&")[0] %}
+                                                    {% else %}
+                                                        {% set embed_url = v_url %}
+                                                    {% endif %}
+
+                                                    <div class="video-container">
+                                                        <iframe src="{{ embed_url }}?rel=0&modestbranding=1&controls=1&showinfo=0&iv_load_policy=3&disablekb=1&fs=0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
+                                                    </div>
+                                                </div>
+                                            {% endif %}
+
+                                            {% if lesson.pdf_url %}
+                                                <div>
+                                                    <a href="{{ lesson.pdf_url }}" target="_blank" class="pdf-btn">📄 تحميل ورقة التمارين (PDF)</a>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% endfor %}
+                        {% endif %}
                     </div>
                 {% endfor %}
             {% else %}
