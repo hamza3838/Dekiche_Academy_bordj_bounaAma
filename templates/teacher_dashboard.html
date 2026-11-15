@@ -43,7 +43,6 @@
     </style>
 
     <script>
-        // ربط الطور بكل من السنوات الدراسية والمواد الخاصة به ديناميكياً
         function updateCycleData() {
             const cycleSelect = document.getElementById('cycleSelect');
             const gradeSelect = document.getElementById('gradeSelect');
@@ -51,7 +50,6 @@
             
             const selectedCycle = cycleSelect.value;
             
-            // تفريغ القوائم الحالية
             gradeSelect.innerHTML = '<option value="">اختر السنة الدراسية...</option>';
             subjectSelect.innerHTML = '<option value="">اختر المادة...</option>';
             
@@ -115,12 +113,51 @@
                 });
             }
         }
+
+        // دالة ديناميكية لتغيير واجهة الإدخال حسب اختيار المادة (رياضيات مقابل المواد الأخرى)
+        function handleSubjectChange() {
+            const subjectSelect = document.getElementById('subjectSelect');
+            const unitLabel = document.getElementById('unitLabel');
+            const unitSelect = document.getElementById('unitSelect');
+            const weekGroup = document.getElementById('weekGroup');
+
+            if (subjectSelect.value === 'الرياضيات') {
+                unitLabel.textContent = "الوضعية الانطلاقية:";
+                unitSelect.innerHTML = `
+                    <option value="">اختر الوضعية الانطلاقية...</option>
+                    <option value="الوضعية الانطلاقية 1">الوضعية الانطلاقية 1</option>
+                    <option value="الوضعية الانطلاقية 2">الوضعية الانطلاقية 2</option>
+                    <option value="الوضعية الانطلاقية 3">الوضعية الانطلاقية 3</option>
+                    <option value="الوضعية الانطلاقية 4">الوضعية الانطلاقية 4</option>
+                    <option value="الوضعية الانطلاقية 5">الوضعية الانطلاقية 5</option>
+                    <option value="الوضعية الانطلاقية 6">الوضعية الانطلاقية 6</option>
+                `;
+                // إخفاء حقل الأسبوع للرياضيات لأنه يعتمد على الترتيب التصاعدي (1 إلى 25)
+                weekGroup.style.display = 'none';
+                document.getElementById('weekSelect').required = false;
+            } else {
+                unitLabel.textContent = "المقطع التعليمي:";
+                unitSelect.innerHTML = `
+                    <option value="">اختر المقطع...</option>
+                    <option value="المقطع الأول">المقطع الأول</option>
+                    <option value="المقطع الثاني">المقطع الثاني</option>
+                    <option value="المقطع الثالث">المقطع الثالث</option>
+                    <option value="المقطع الرابع">المقطع الرابع</option>
+                    <option value="المقطع الخامس">المقطع الخامس</option>
+                    <option value="المقطع السادس">المقطع السادس</option>
+                    <option value="المقطع السابع">المقطع السابع</option>
+                    <option value="المقطع الثامن">المقطع الثامن</option>
+                `;
+                weekGroup.style.display = 'block';
+                document.getElementById('weekSelect').required = true;
+            }
+        }
     </script>
 </head>
 <body>
     <div class="wrapper">
         <div class="top-bar">
-            <h1>لوحة تحكم الأستاذ - إضافة الدروس</h1>
+            <h1>لوحة تحكم الأستاذ - إضافة الدروس وأوراق التمارين</h1>
             <a href="/logout" class="btn-logout">تسجيل الخروج</a>
         </div>
 
@@ -133,7 +170,7 @@
         {% endwith %}
 
         <div class="card">
-            <h2>إضافة درس جديد</h2>
+            <h2>إضافة درس أو ورقة تمارين جديدة</h2>
             <form method="POST">
                 <div class="form-grid">
                     <!-- اختيار الطور أولاً -->
@@ -148,7 +185,7 @@
 
                     <!-- اختيار السنة الدراسية -->
                     <div class="form-group">
-                        <label>السن الدراسي:</label>
+                        <label>السنة الدراسية:</label>
                         <select name="school_year" id="gradeSelect" required>
                             <option value="">اختر الطور أولاً...</option>
                         </select>
@@ -157,24 +194,16 @@
                     <!-- اختيار المادة -->
                     <div class="form-group">
                         <label>المادة:</label>
-                        <select name="subject" id="subjectSelect" required>
+                        <select name="subject" id="subjectSelect" onchange="handleSubjectChange()" required>
                             <option value="">اختر الطور أولاً...</option>
                         </select>
                     </div>
 
-                    <!-- اختيار المقطع التعليمي -->
+                    <!-- اختيار المقطع التعليمي أو الوضعية الانطلاقية (ديناميكي) -->
                     <div class="form-group">
-                        <label>المقطع التعليمي:</label>
-                        <select name="unit" required>
-                            <option value="">اختر المقطع...</option>
-                            <option value="المقطع الأول">المقطع الأول</option>
-                            <option value="المقطع الثاني">المقطع الثاني</option>
-                            <option value="المقطع الثالث">المقطع الثالث</option>
-                            <option value="المقطع الرابع">المقطع الرابع</option>
-                            <option value="المقطع الخامس">المقطع الخامس</option>
-                            <option value="المقطع السادس">المقطع السادس</option>
-                            <option value="المقطع السابع">المقطع السابع</option>
-                            <option value="المقطع الثامن">المقطع الثامن</option>
+                        <label id="unitLabel">المقطع التعليمي / الوضعية:</label>
+                        <select name="unit" id="unitSelect" required>
+                            <option value="">اختر المادة أولاً...</option>
                         </select>
                     </div>
 
@@ -193,9 +222,10 @@
                         </select>
                     </div>
 
-                    <div class="form-group">
+                    <!-- الأسبوع (يظهر في العربية ويختفي تلقائياً في الرياضيات) -->
+                    <div class="form-group" id="weekGroup">
                         <label>الأسبوع:</label>
-                        <select name="week" required>
+                        <select name="week" id="weekSelect" required>
                             <option value="الأسبوع الأول">الأسبوع الأول</option>
                             <option value="الأسبوع الثاني">الأسبوع الثاني</option>
                             <option value="الأسبوع الثالث">الأسبوع الثالث</option>
@@ -207,11 +237,11 @@
                 <div class="form-grid" style="grid-template-columns: 2fr 1fr;">
                     <div class="form-group">
                         <label>عنوان الدرس:</label>
-                        <input type="text" name="title" placeholder="مثال: درس جمع الاعداد الطبيعية" required>
+                        <input type="text" name="title" placeholder="مثال: الوضعية الانطلاقية 1 أو درس جمع الأعداد" required>
                     </div>
                     <div class="form-group">
-                        <label>رقم الترتيب (الأولوية):</label>
-                        <input type="number" name="lesson_order" value="0" placeholder="0" required>
+                        <label>رقم الترتيب (للرياضيات 1 إلى 25):</label>
+                        <input type="number" name="lesson_order" value="1" placeholder="1" required>
                     </div>
                 </div>
 
@@ -221,7 +251,7 @@
                         <input type="url" name="video_url" placeholder="https://www.youtube.com/watch?v=..." required>
                     </div>
                     <div class="form-group">
-                        <label>رابط ملف الـ PDF (اختياري):</label>
+                        <label>رابط ملف التمارين PDF (اختياري):</label>
                         <input type="url" name="pdf_url" placeholder="https://...">
                     </div>
                 </div>
@@ -232,7 +262,7 @@
 
         <!-- جدول عرض الدروس المضافة -->
         <div class="card">
-            <h2>الدروس المسجلة في المنصة</h2>
+            <h2>الدروس وأوراق التمارين المسجلة في المنصة</h2>
             <div class="table-responsive">
                 <table>
                     <thead>
@@ -240,11 +270,11 @@
                             <th>الترتيب</th>
                             <th>السنة الدراسية</th>
                             <th>المادة</th>
-                            <th>المقطع</th>
+                            <th>المقطع / الوضعية</th>
                             <th>الشهر / الأسبوع</th>
                             <th>عنوان الدرس</th>
                             <th>رابط الفيديو</th>
-                            <th>الملف</th>
+                            <th>ملف التمارين (PDF)</th>
                             <th>إجراء</th>
                         </tr>
                     </thead>
@@ -256,7 +286,7 @@
                                     <td>{{ lesson.school_year }}</td>
                                     <td>{{ lesson.subject }}</td>
                                     <td>{{ lesson.unit or '-' }}</td>
-                                    <td>{{ lesson.month }} - {{ lesson.week }}</td>
+                                    <td>{{ lesson.month }} {% if lesson.week %}- {{ lesson.week }}{% endif %}</td>
                                     <td>{{ lesson.title }}</td>
                                     <td>
                                         {% if lesson.video_url %}
@@ -273,10 +303,8 @@
                                         {% endif %}
                                     </td>
                                     <td>
-                                        <!-- زر التعديل الجديد -->
                                         <a href="{{ url_for('edit_lesson', lesson_id=lesson.id) }}" class="btn-edit">تعديل</a>
                                         
-                                        <!-- زر الحذف -->
                                         <form action="{{ url_for('delete_lesson', lesson_id=lesson.id) }}" method="POST" onsubmit="return confirm('هل أنت متأكد من حذف هذا الدرس؟');" style="display:inline;">
                                             <button type="submit" class="btn-delete">حذف</button>
                                         </form>
