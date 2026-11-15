@@ -92,11 +92,12 @@ def student_dashboard():
 
     student_name = session['student_name']
     
+    subscriptions = []
+    lessons = []
     try:
         subs_res = supabase.table('access_codes').select('*').eq('student_name', student_name).execute()
         subscriptions = subs_res.data if subs_res and subs_res.data else []
 
-        lessons = []
         if subscriptions:
             for sub in subscriptions:
                 g_val = sub.get('grade') or sub.get('school_year')
@@ -112,7 +113,28 @@ def student_dashboard():
         flash(f"حدث خطأ أثناء جلب الدروس: {e}", "danger")
         lessons = []
 
-    return render_template('student_dashboard.html', student_name=student_name, subscriptions=subscriptions, lessons=lessons)
+    # تنظيم الدروس حسب طبيعة المادة (رياضيات: وضعيات انطلاقية، بقية المواد: مقاطع ثم أسابيع)
+    organized_data = {}
+    if subscriptions:
+        current_subject = subscriptions[0].get('subject') # أو بناءً على المادة المختارة
+        # للتسهيل، سنصنف بناءً على المادة الأولى أو نجعلها مرنة لكل المادة المعروضة
+        for lesson in lessons:
+            subject = lesson.get('subject')
+            if subject == 'الرياضيات':
+                situation = lesson.get('unit') or 'الوضعية الانطلاقية العامة'
+                if situation not in organized_data:
+                    organized_data[situation] = []
+                organized_data[situation].append(lesson)
+            else:
+                unit = lesson.get('unit') or 'مقطع عام'
+                week = lesson.get('week') or 'الأسبوع الأول'
+                if unit not in organized_data:
+                    organized_data[unit] = {}
+                if week not in organized_data[unit]:
+                    organized_data[unit][week] = []
+                organized_data[unit][week].append(lesson)
+
+    return render_template('student_dashboard.html', student_name=student_name, subscriptions=subscriptions, lessons=lessons, organized_data=organized_data)
 
 # --- مسار تفعيل كود الشهر الجديد من داخل حساب التلميذ ---
 @app.route('/redeem-code', methods=['POST'])
@@ -166,7 +188,7 @@ def teacher_dashboard():
     if request.method == 'POST':
         school_year = request.form.get('school_year')
         subject = request.form.get('subject')
-        unit = request.form.get('unit')  # المقطع التعليمي
+        unit = request.form.get('unit')  # المقطع التعليمي أو الوضعية الانطلاقية
         month = request.form.get('month')  # الشهر بنظام الأرقام (مثل الشهر 1)
         week = request.form.get('week')
         title = request.form.get('title')
@@ -190,7 +212,7 @@ def teacher_dashboard():
                 'pdf_url': pdf_url,
                 'lesson_order': lesson_order
             }).execute()
-            flash("تم إضافة الدرس ضمن المقطع بنجاح!", "success")
+            flash("تم إضافة الدرس أو التمارين بنجاح!", "success")
         except Exception as e:
             flash(f"خطأ أثناء إضافة الدرس: {e}", "danger")
 
@@ -204,7 +226,7 @@ def teacher_dashboard():
 
     return render_template('teacher_dashboard.html', lessons=lessons_data)
 
-# --- مسار تعديل الدرس للأستاذ (تحديث المقطع، الأسبوع، وبقية البيانات) ---
+# --- مسار تعديل الدرس للأستاذ ---
 @app.route('/edit-lesson/<int:lesson_id>', methods=['GET', 'POST'])
 def edit_lesson(lesson_id):
     if not session.get('is_teacher'):
@@ -235,159 +257,4 @@ def edit_lesson(lesson_id):
         week = request.form.get('week')
         title = request.form.get('title')
         video_url = request.form.get('video_url')
-        pdf_url = request.form.get('pdf_url')
-        
-        try:
-            lesson_order = int(request.form.get('lesson_order', 0))
-        except ValueError:
-            lesson_order = 0
-
-        try:
-            supabase.table('lessons').update({
-                'school_year': school_year,
-                'subject': subject,
-                'unit': unit,
-                'month': month,
-                'week': week,
-                'title': title,
-                'video_url': video_url,
-                'pdf_url': pdf_url,
-                'lesson_order': lesson_order
-            }).eq('id', lesson_id).execute()
-            
-            flash("تم تحديث وتعديل الدرس بنجاح!", "success")
-        except Exception as e:
-            flash(f"خطأ أثناء تحديث الدرس: {e}", "danger")
-
-        return redirect(url_for('teacher_dashboard'))
-
-# --- مسار حذف الدرس للأستاذ ---
-@app.route('/delete-lesson/<int:lesson_id>', methods=['POST'])
-def delete_lesson(lesson_id):
-    if not session.get('is_teacher'):
-        return redirect(url_for('teacher_login'))
-
-    if not supabase:
-        flash("عذراً، الاتصال بقاعدة البيانات غير متوفر حالياً.", "danger")
-        return redirect(url_for('teacher_dashboard'))
-
-    try:
-        supabase.table('lessons').delete().eq('id', lesson_id).execute()
-        flash("تم حذف الدرس بنجاح!", "success")
-    except Exception as e:
-        flash(f"خطأ أثناء حذف الدرس: {e}", "danger")
-
-    return redirect(url_for('teacher_dashboard'))
-
-@app.route('/admin-secret-panel-daqiche', methods=['GET', 'POST'])
-def admin_panel():
-    if request.method == 'POST' and 'password' in request.form:
-        if request.form.get('password') == ADMIN_PASSWORD:
-            session['is_admin'] = True
-        else:
-            flash("كلمة المرور غير صحيحة", "danger")
-
-    if not session.get('is_admin'):
-        return render_template('admin_login.html')
-
-    if not supabase:
-        flash("عذراً، الاتصال بقاعدة البيانات غير متوفر حالياً.", "danger")
-        return render_template('admin_panel.html', codes=[])
-
-    if request.method == 'POST' and 'generate_code' in request.form:
-        school_year = request.form.get('school_year')
-        subject = request.form.get('subject')
-        month = request.form.get('month')  # الشهر بنظام الأرقام (الشهر 1، الشهر 2...)
-
-        try:
-            count = int(request.form.get('count', 1))
-            if count < 1: count = 1
-            if count > 50: count = 50
-        except ValueError:
-            count = 1
-
-        future_date = (datetime.datetime.now() + datetime.timedelta(days=365)).strftime('%Y-%m-%d %H:%M:%S')
-
-        try:
-            characters = string.ascii_uppercase + string.digits
-            
-            for _ in range(count):
-                random_code = ''.join(random.choices(characters, k=8))
-                supabase.table('access_codes').insert({
-                    'code': random_code,
-                    'grade': school_year,
-                    'subject': subject,
-                    'month': month,
-                    'is_registered': 0,
-                    'student_name': "غير محدد",
-                    'phone': "0000000000",
-                    'expires_at': future_date
-                }).execute()
-            
-            flash(f"تم توليد {count} كود بنجاح (أرقام وحروف فقط)!", "success")
-        except Exception as e:
-            flash(f"خطأ أثناء حفظ الأكواد: {e}", "danger")
-
-    codes = []
-    try:
-        codes_res = supabase.table('access_codes').select('*').order('id', desc=True).execute()
-        if codes_res and codes_res.data:
-            codes = codes_res.data
-    except Exception as e:
-        pass
-
-    return render_template('admin_panel.html', codes=codes)
-
-# --- مسار حذف كود معين للمشرف ---
-@app.route('/delete-code/<int:code_id>', methods=['POST'])
-def delete_code(code_id):
-    if not session.get('is_admin'):
-        return redirect(url_for('admin_panel'))
-
-    if not supabase:
-        flash("عذراً، الاتصال بقاعدة البيانات غير متوفر حالياً.", "danger")
-        return redirect(url_for('admin_panel'))
-
-    try:
-        supabase.table('access_codes').delete().eq('id', code_id).execute()
-        flash("تم حذف الكود بنجاح!", "success")
-    except Exception as e:
-        flash(f"خطأ أثناء حذف الكود: {e}", "danger")
-
-    return redirect(url_for('admin_panel'))
-
-# --- مسار الحذف الجماعي أو المختار للأكواد للمشرف ---
-@app.route('/delete-selected-codes', methods=['POST'])
-def delete_selected_codes():
-    if not session.get('is_admin'):
-        return redirect(url_for('admin_panel'))
-
-    if not supabase:
-        flash("عذراً، الاتصال بقاعدة البيانات غير متوفر حالياً.", "danger")
-        return redirect(url_for('admin_panel'))
-
-    selected_ids = request.form.getlist('code_ids')
-    action_type = request.form.get('action_type')
-
-    try:
-        if action_type == 'all':
-            supabase.table('access_codes').delete().gt('id', 0).execute()
-            flash("تم حذف كافة الأكواد بنجاح!", "success")
-        elif selected_ids:
-            for code_id in selected_ids:
-                supabase.table('access_codes').delete().eq('id', int(code_id)).execute()
-            flash(f"تم حذف {len(selected_ids)} كود بنجاح!", "success")
-        else:
-            flash("لم يتم تحديد أي كود للحذف!", "danger")
-    except Exception as e:
-        flash(f"خطأ أثناء الحذف: {e}", "danger")
-
-    return redirect(url_for('admin_panel'))
-
-@app.route('/logout')
-def logout():
-    session.clear()
-    return redirect(url_for('home'))
-
-if __name__ == '__main__':
-    app.run(debug=True)
+        pdf_url = request
